@@ -2217,7 +2217,7 @@ def _interactive_js(exa: ExampleAResult) -> str:
       step: 0.1,
       value: A,
       format: (v) => fmt(v, 2),
-      onInput: (v) => {{ A = v; maybeRedraw(); }},
+      onInput: (v) => {{ A = v; thetaDeg = thetaStarDegFor(A, B, C); thetaSlider.value = String(thetaDeg); thetaSlider.__val.textContent = `${{fmt(thetaDeg, 1)}}° (≈ ${{fmt(thetaDeg * Math.PI / 180, 3)}} rad)`; maybeRedraw(); }},
     }});
     const BSlider = buildSliderRow(controls, {{
       label: 'B',
@@ -2226,7 +2226,7 @@ def _interactive_js(exa: ExampleAResult) -> str:
       step: 0.1,
       value: B,
       format: (v) => fmt(v, 2),
-      onInput: (v) => {{ B = v; maybeRedraw(); }},
+      onInput: (v) => {{ B = v; thetaDeg = thetaStarDegFor(A, B, C); thetaSlider.value = String(thetaDeg); thetaSlider.__val.textContent = `${{fmt(thetaDeg, 1)}}° (≈ ${{fmt(thetaDeg * Math.PI / 180, 3)}} rad)`; maybeRedraw(); }},
     }});
     const CSlider = buildSliderRow(controls, {{
       label: 'C',
@@ -2235,7 +2235,7 @@ def _interactive_js(exa: ExampleAResult) -> str:
       step: 0.1,
       value: C,
       format: (v) => fmt(v, 2),
-      onInput: (v) => {{ C = v; maybeRedraw(); }},
+      onInput: (v) => {{ C = v; thetaDeg = thetaStarDegFor(A, B, C); thetaSlider.value = String(thetaDeg); thetaSlider.__val.textContent = `${{fmt(thetaDeg, 1)}}° (≈ ${{fmt(thetaDeg * Math.PI / 180, 3)}} rad)`; maybeRedraw(); }},
     }});
     const thetaSlider = buildSliderRow(controls, {{
       label: 'θ（旋转角）',

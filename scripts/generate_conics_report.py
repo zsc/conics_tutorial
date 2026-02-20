@@ -2256,14 +2256,6 @@ def _interactive_js(exa: ExampleAResult) -> str:
     const axY = svg('line', {{ class: 'axis' }}, svgRoot);
     const axU = svg('line', {{ class: 'axis-rot' }}, svgRoot);
     const axV = svg('line', {{ class: 'axis-rot' }}, svgRoot);
-    const lblX = svg('text', {{ class: 'axis-label' }}, svgRoot);
-    const lblY = svg('text', {{ class: 'axis-label' }}, svgRoot);
-    const lblU = svg('text', {{ class: 'axis-label-rot' }}, svgRoot);
-    const lblV = svg('text', {{ class: 'axis-label-rot' }}, svgRoot);
-    lblX.textContent = 'x';
-    lblY.textContent = 'y';
-    lblU.textContent = 'u';
-    lblV.textContent = 'v';
 
     function setLabel(node, p) {{
       node.setAttribute('x', String(p.x));
@@ -2474,10 +2466,7 @@ def _interactive_js(exa: ExampleAResult) -> str:
       const vEnd = {{ x: -L * su, y: L * cu }};
       lineFromPoints(axU, {{ x: -uEnd.x, y: -uEnd.y }}, uEnd);
       lineFromPoints(axV, {{ x: -vEnd.x, y: -vEnd.y }}, vEnd);
-      setLabel(lblX, {{ x: bx.x * 1.02, y: 0.18 }});
-      setLabel(lblY, {{ x: 0.18, y: by.y * 1.02 }});
-      setLabel(lblU, {{ x: uEnd.x * 1.02, y: uEnd.y * 1.02 }});
-      setLabel(lblV, {{ x: vEnd.x * 1.02, y: vEnd.y * 1.02 }});
+
       setViewBox(svgRoot, bounds, 0.2);
 
       readout.innerHTML = `

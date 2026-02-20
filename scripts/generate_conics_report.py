@@ -2270,7 +2270,7 @@ def _interactive_js(exa: ExampleAResult) -> str:
       node.setAttribute('y', String(-p.y));
       node.setAttribute('text-anchor', 'middle');
       node.setAttribute('dominant-baseline', 'middle');
-      node.setAttribute('font-size', '13px');
+      node.setAttribute('font-size', '0.35');
     }}
 
     function classify(delta2) {{

@@ -439,6 +439,68 @@ $$
 """
 
 
+def _build_determinant_appendix_markdown() -> str:
+    # Avoid fragile matrix environments in markdown2; keep formulas expanded.
+    return r"""
+## 9) 附录：二元一次方程的行列式、以及解析几何里用行列式/“叉积”求面积
+
+### 9.1 二元一次方程组：行列式判定与 Cramer 法则
+
+考虑
+$$
+\begin{cases}
+ax+by=e \\\\
+cx+dy=f
+\end{cases}
+$$
+记
+$$
+\Delta = ad-bc.
+$$
+
+- 若 \\(\Delta\neq 0\\)：唯一解
+  $$
+  x=\frac{ed-bf}{\Delta},\qquad y=\frac{af-ec}{\Delta}.
+  $$
+- 若 \\(\Delta=0\\)：两条直线“平行或重合”。进一步看
+  $$
+  \Delta_x=ed-bf,\qquad \Delta_y=af-ec.
+  $$
+  - \\(\Delta_x=\Delta_y=0\\)：无穷多解（同一条直线）
+  - 否则：无解（两条平行不同线）
+
+> 和正文 1.5 的联系：中心方程组的系数矩阵是 \\(\begin{pmatrix}2A&B\\\\B&2C\end{pmatrix}\\)，其行列式为 \\(4AC-B^2\\)。因此 \\(4AC-B^2\neq 0\\)（等价于 \\(\Delta_2=B^2-4AC\neq 0\\)）时才有唯一中心；而 \\(\Delta_2=0\\) 的抛物线型通常没有中心。
+
+### 9.2 平面面积：2×2 行列式（“叉积”）与鞋带公式
+
+- 向量 \\(u=(u_x,u_y)\\), \\(v=(v_x,v_y)\\) 张成的平行四边形面积：
+  $$
+  S_{\parallel}=\bigl|u_xv_y-u_yv_x\bigr|.
+  $$
+  三角形面积就是它的一半。
+
+- 三点 \\(P_1(x_1,y_1),P_2(x_2,y_2),P_3(x_3,y_3)\\) 的三角形面积：
+  $$
+  S_{\triangle}=\frac12\Bigl|x_1(y_2-y_3)+x_2(y_3-y_1)+x_3(y_1-y_2)\Bigr|.
+  $$
+
+- 同一个三角形面积也可写成 3×3 行列式（解析几何很常用）：
+  $$
+  S_{\triangle}=\frac12\left|\det\begin{pmatrix}
+  x_1 & y_1 & 1 \\\\
+  x_2 & y_2 & 1 \\\\
+  x_3 & y_3 & 1
+  \end{pmatrix}\right|.
+  $$
+
+- 多边形（按顶点顺序 \\((x_i,y_i)\\)）面积（鞋带公式）：
+  $$
+  S=\frac12\left|\sum_{i=1}^{n}\left(x_i y_{i+1}-y_i x_{i+1}\right)\right|,\quad (x_{n+1},y_{n+1})=(x_1,y_1).
+  $$
+  这在解析几何里经常用于“坐标法求面积/判共线（面积为 0）”。
+"""
+
+
 def _build_generated_section(a: ExampleAResult, b: ExampleBResult, h: HyperbolaResult) -> str:
     return rf"""
 ---
@@ -495,6 +557,26 @@ def _build_generated_section(a: ExampleAResult, b: ExampleBResult, h: HyperbolaR
 ### 6.5 立体圆锥截线：一个互动图统一椭圆/抛物线/双曲线
 
 <div id="widget-cone-unified" class="widget"></div>
+
+### 6.6 准线—离心率：焦点—准线定义互动验证（统一三类曲线）
+
+> 验证 \\(\\frac{{\\text{{点到焦点距离}}}}{{\\text{{点到准线距离}}}}=e\\)；不同曲线类型对应 \\(0&lt;e&lt;1\\)、\\(e=1\\)、\\(e&gt;1\\)。
+
+<div id="widget-ecc-directrix" class="widget"></div>
+
+### 6.7 旋转角与 \\((A,B,C)\\)：消去 \\(xy\\) 交叉项 + 判别式不变
+
+> 公式：\\(\\tan 2\\theta = \\frac{{B}}{{A-C}}\\)。拖动 \\(A,B,C,\\theta\\) 观察旋转后 \\(B'(\\theta)\\to 0\\)，以及 \\(\\Delta_2=B^2-4AC\\) 的旋转不变性。
+
+<div id="widget-rotation-abc" class="widget"></div>
+
+### 6.8 反射性质（焦点反射）：统一互动图（椭圆/抛物线/双曲线）
+
+- 椭圆：从一个焦点出发，反射后到另一个焦点
+- 抛物线：从焦点出发，反射后平行于轴（反过来也成立）
+- 双曲线：从一个焦点出发，反射后“好像来自”另一个焦点（虚像）
+
+<div id="widget-reflection-unified" class="widget"></div>
 """
 
 
@@ -582,6 +664,34 @@ def _collapse_code_blocks(body_html: str) -> str:
         )
 
     return pattern.sub(repl, body_html)
+
+
+def _collapse_zugeng_principle(body_html: str) -> str:
+    """
+    Collapse the Cavalieri/祖暅原理 explanation under the ellipse area formula.
+
+    We do this at HTML level because markdown2 doesn't treat <details> as a block
+    element, and our TeX blocks are embedded inside <p> tags.
+    """
+
+    marker = "祖暅原理（Cavalieri/“截面积守恒”思想）的一个推导思路（平面版）：</p>"
+    start = body_html.find(marker)
+    if start < 0:
+        return body_html
+
+    before = body_html[:start]
+    after = body_html[start + len(marker) :]
+    cut = after.find("切线（点")
+    if cut < 0:
+        return body_html
+
+    after = after[:cut] + "</p>\n</details>\n<p>" + after[cut:]
+    return (
+        before
+        + "</p>\n"
+        + '<details class="fold"><summary>祖暅原理（Cavalieri）推导思路（点击展开）</summary>\n'
+        + after
+    )
 
 
 def _interactive_js(exa: ExampleAResult) -> str:
@@ -681,7 +791,7 @@ def _interactive_js(exa: ExampleAResult) -> str:
 
   function buildSliderRow(parent, opts) {{
     const row = el('div', {{ class: 'control-row' }}, parent);
-    el('div', {{ class: 'control-label', text: opts.label }}, row);
+    const label = el('div', {{ class: 'control-label', text: opts.label }}, row);
     const input = el('input', {{
       type: 'range',
       min: opts.min,
@@ -698,6 +808,10 @@ def _interactive_js(exa: ExampleAResult) -> str:
       opts.onInput?.(Number(input.value));
     }});
     updateVal();
+    // Attach handles so callers can hide/show the whole row without changing API.
+    input.__row = row;
+    input.__val = val;
+    input.__label = label;
     return input;
   }}
 
@@ -1813,12 +1927,863 @@ def _interactive_js(exa: ExampleAResult) -> str:
     redraw();
   }}
 
+  function mountEccentricityDirectrix() {{
+    const container = document.getElementById('widget-ecc-directrix');
+    if (!container) return;
+    container.innerHTML = '';
+    container.classList.add('widget');
+
+    el('div', {{
+      class: 'widget-title',
+      text: '准线—离心率：验证 PF / dist(P, directrix) = e（滑块调参/选点）',
+    }}, container);
+
+    const controls = el('div', {{ class: 'widget-controls' }}, container);
+    const svgRoot = svg('svg', {{ class: 'conic-svg', role: 'img' }}, container);
+    const readout = el('div', {{ class: 'widget-readout' }}, container);
+
+    const typeRow = el('div', {{ class: 'control-row' }}, controls);
+    el('div', {{ class: 'control-label', text: '曲线类型' }}, typeRow);
+    const typeSel = el('select', {{ class: 'control-select' }}, typeRow);
+    el('option', {{ value: 'ellipse', text: '椭圆 (0<e<1)' }}, typeSel);
+    el('option', {{ value: 'parabola', text: '抛物线 (e=1)' }}, typeSel);
+    el('option', {{ value: 'hyperbola', text: '双曲线 (e>1)' }}, typeSel);
+    const typeVal = el('div', {{ class: 'control-value', text: '' }}, typeRow);
+
+    const branchRow = el('div', {{ class: 'control-row' }}, controls);
+    el('div', {{ class: 'control-label', text: '双曲线分支' }}, branchRow);
+    const branchSel = el('select', {{ class: 'control-select' }}, branchRow);
+    el('option', {{ value: 'right', text: '右支' }}, branchSel);
+    el('option', {{ value: 'left', text: '左支' }}, branchSel);
+    const branchVal = el('div', {{ class: 'control-value', text: '' }}, branchRow);
+
+    let a = 4.2;
+    let b = 2.6;
+    let p = 2.0;
+    let param = 1.0;
+
+    const aSlider = buildSliderRow(controls, {{
+      label: 'a',
+      min: 1.2,
+      max: 7.0,
+      step: 0.05,
+      value: a,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => {{ a = v; redraw(); }},
+    }});
+    const bSlider = buildSliderRow(controls, {{
+      label: 'b',
+      min: 0.6,
+      max: 6.5,
+      step: 0.05,
+      value: b,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => {{ b = v; redraw(); }},
+    }});
+    const pSlider = buildSliderRow(controls, {{
+      label: 'p（抛物线 y²=4px）',
+      min: 0.6,
+      max: 5.0,
+      step: 0.05,
+      value: p,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => {{ p = v; redraw(); }},
+    }});
+
+    const paramOpts = {{
+      label: '参数',
+      min: 0,
+      max: (2 * Math.PI).toFixed(4),
+      step: 0.01,
+      value: param,
+      format: (t) => `${{fmt(t, 3)}}`,
+      onInput: (v) => {{ param = v; redraw(); }},
+    }};
+    const paramSlider = buildSliderRow(controls, paramOpts);
+
+    // SVG elements
+    const curve1 = svg('path', {{ class: 'curve' }}, svgRoot);
+    const curve2 = svg('path', {{ class: 'curve-alt' }}, svgRoot);
+    const directrix = svg('line', {{ class: 'directrix' }}, svgRoot);
+    const segPF = svg('line', {{ class: 'seg' }}, svgRoot);
+    const segPQ = svg('line', {{ class: 'seg3' }}, svgRoot);
+    const cF = svg('circle', {{ class: 'focus', r: 0.12 }}, svgRoot);
+    const cP = svg('circle', {{ class: 'point', r: 0.14 }}, svgRoot);
+
+    function setParamConfig(cfg) {{
+      paramSlider.__label.textContent = cfg.label;
+      paramSlider.min = String(cfg.min);
+      paramSlider.max = String(cfg.max);
+      paramSlider.step = String(cfg.step);
+      paramSlider.value = String(cfg.value);
+      paramOpts.format = cfg.format;
+      // update display without triggering redraw twice
+      paramSlider.__val.textContent = paramOpts.format
+        ? paramOpts.format(Number(paramSlider.value))
+        : String(paramSlider.value);
+    }}
+
+    function updateUI() {{
+      const type = typeSel.value;
+      typeVal.textContent = '';
+      branchVal.textContent = '';
+
+      aSlider.__row.style.display = type === 'parabola' ? 'none' : 'grid';
+      bSlider.__row.style.display = type === 'parabola' ? 'none' : 'grid';
+      pSlider.__row.style.display = type === 'parabola' ? 'grid' : 'none';
+      branchRow.style.display = type === 'hyperbola' ? 'grid' : 'none';
+
+      if (type === 'ellipse') {{
+        setParamConfig({{
+          label: 't（角参数）',
+          min: 0,
+          max: 2 * Math.PI,
+          step: 0.01,
+          value: Number(paramSlider.value) % (2 * Math.PI),
+          format: (t) => `${{fmt(t, 3)}} rad  (≈ ${{fmt(t * 180 / Math.PI, 1)}}°)`,
+        }});
+      }} else if (type === 'parabola') {{
+        setParamConfig({{
+          label: 't（参数点）',
+          min: -3.5,
+          max: 3.5,
+          step: 0.01,
+          value: Math.max(-3.5, Math.min(3.5, Number(paramSlider.value))),
+          format: (t) => fmt(t, 2),
+        }});
+      }} else {{
+        setParamConfig({{
+          label: 'u（双曲参数）',
+          min: -2.0,
+          max: 2.0,
+          step: 0.01,
+          value: Math.max(-2.0, Math.min(2.0, Number(paramSlider.value))),
+          format: (u) => fmt(u, 2),
+        }});
+      }}
+    }}
+
+    function redraw() {{
+      const type = typeSel.value;
+      a = Number(aSlider.value);
+      b = Number(bSlider.value);
+      p = Number(pSlider.value);
+      param = Number(paramSlider.value);
+
+      // keep ellipse real + avoid c≈0 blowing up directrix
+      if (type === 'ellipse') {{
+        if (b >= a) {{
+          b = a * 0.95;
+          bSlider.value = String(b);
+          bSlider.__val.textContent = fmt(b, 2);
+        }}
+      }}
+
+      let pts1 = [];
+      let pts2 = [];
+      let P = {{ x: 0, y: 0 }};
+      let focus = {{ x: 0, y: 0 }};
+      let directrixX = 0;
+      let ecc = 1;
+
+      if (type === 'ellipse') {{
+        const N = 520;
+        for (let i = 0; i <= N; i++) {{
+          const t = (i / N) * 2 * Math.PI;
+          pts1.push({{ x: a * Math.cos(t), y: b * Math.sin(t) }});
+        }}
+        P = {{ x: a * Math.cos(param), y: b * Math.sin(param) }};
+        const c = Math.sqrt(Math.max(a * a - b * b, 0));
+        ecc = c > 0 ? c / a : 0;
+        const side = P.x >= 0 ? 1 : -1;
+        focus = {{ x: side * c, y: 0 }};
+        directrixX = (c > 1e-10) ? side * (a * a / c) : side * 1e6;
+        curve1.setAttribute('d', pathFromWorld(pts1));
+        curve2.setAttribute('d', '');
+      }} else if (type === 'parabola') {{
+        const tMax = 3.5;
+        const N = 520;
+        for (let i = 0; i <= N; i++) {{
+          const t = -tMax + (2 * tMax * i) / N;
+          pts1.push({{ x: p * t * t, y: 2 * p * t }});
+        }}
+        P = {{ x: p * param * param, y: 2 * p * param }};
+        focus = {{ x: p, y: 0 }};
+        directrixX = -p;
+        ecc = 1;
+        curve1.setAttribute('d', pathFromWorld(pts1));
+        curve2.setAttribute('d', '');
+      }} else {{
+        const U = 2.0;
+        const N = 520;
+        const side = branchSel.value === 'left' ? -1 : 1;
+        for (let i = 0; i <= N; i++) {{
+          const u = -U + (2 * U * i) / N;
+          const x = a * Math.cosh(u);
+          const y = b * Math.sinh(u);
+          pts1.push({{ x, y }});
+          pts2.push({{ x: -x, y }});
+        }}
+        P = {{ x: side * a * Math.cosh(param), y: b * Math.sinh(param) }};
+        const c = Math.hypot(a, b);
+        ecc = c / a;
+        focus = {{ x: side * c, y: 0 }};
+        directrixX = side * (a * a / c);
+        curve1.setAttribute('d', pathFromWorld(pts1));
+        curve2.setAttribute('d', pathFromWorld(pts2));
+      }}
+
+      // geometry (distance to vertical directrix)
+      const Q = {{ x: directrixX, y: P.y }};
+      const dF = dist(P, focus);
+      const dDir = Math.abs(P.x - directrixX);
+      const ratio = dDir > 1e-12 ? dF / dDir : NaN;
+      const err = ratio - ecc;
+
+      // draw features
+      circleAt(cF, focus);
+      circleAt(cP, P);
+      lineFromPoints(segPF, P, focus);
+      lineFromPoints(segPQ, P, Q);
+
+      // directrix segment
+      const allPts = [...pts1, ...pts2, P, focus];
+      const bnd = worldBounds(allPts);
+      const ySpan = Math.max(1.0, Math.max(Math.abs(bnd.ymin), Math.abs(bnd.ymax)) + 0.8);
+      directrix.setAttribute('x1', directrixX);
+      directrix.setAttribute('y1', -(-ySpan));
+      directrix.setAttribute('x2', directrixX);
+      directrix.setAttribute('y2', -(ySpan));
+
+      // viewBox (include directrix endpoints and Q)
+      const bnd2 = worldBounds([...allPts, Q, {{ x: directrixX, y: -ySpan }}, {{ x: directrixX, y: ySpan }}]);
+      setViewBox(svgRoot, bnd2, 0.9);
+
+      const typeText =
+        type === 'ellipse' ? '椭圆' : (type === 'parabola' ? '抛物线' : (branchSel.value === 'left' ? '双曲线（左支）' : '双曲线（右支）'));
+      const dirText = `x = ${{fmt(directrixX, 6)}}`;
+      readout.innerHTML = `
+        <div><span class="k">类型</span>：${{typeText}}；<span class="k">e</span>=${{fmt(ecc, 6)}}；准线 <span class="k">${{dirText}}</span></div>
+        <div><span class="k">P</span>=(${{fmt(P.x, 5)}}, ${{fmt(P.y, 5)}})，<span class="k">F</span>=(${{fmt(focus.x, 5)}}, ${{fmt(focus.y, 5)}})</div>
+        <div><span class="k">PF</span>=${{fmt(dF, 6)}}, <span class="k">dist(P, directrix)</span>=${{fmt(dDir, 6)}}, 比值 PF/dist=${{fmt(ratio, 6)}}；误差=${{fmt(err, 8)}}</div>
+      `;
+    }}
+
+    typeSel.addEventListener('change', () => {{ updateUI(); redraw(); }});
+    branchSel.addEventListener('change', redraw);
+
+    updateUI();
+    redraw();
+  }}
+
+  function mountRotationABC() {{
+    const container = document.getElementById('widget-rotation-abc');
+    if (!container) return;
+    container.innerHTML = '';
+    container.classList.add('widget');
+
+    el('div', {{
+      class: 'widget-title',
+      text: '旋转消去 xy：展示 B\\'(θ)→0 与 Δ₂ 旋转不变（例子含椭圆/抛物线/双曲线型）',
+    }}, container);
+
+    const controls = el('div', {{ class: 'widget-controls' }}, container);
+    const svgRoot = svg('svg', {{ class: 'conic-svg', role: 'img' }}, container);
+    const readout = el('div', {{ class: 'widget-readout' }}, container);
+
+    const conicPath = svg('path', {{ class: 'curve' }}, svgRoot);
+
+    const presetRow = el('div', {{ class: 'control-row' }}, controls);
+    el('div', {{ class: 'control-label', text: '例子' }}, presetRow);
+    const presetSel = el('select', {{ class: 'control-select' }}, presetRow);
+    el('option', {{ value: 'ellipse', text: '椭圆型 (Δ₂<0)' }}, presetSel);
+    el('option', {{ value: 'parabola', text: '抛物线型 (Δ₂=0)' }}, presetSel);
+    el('option', {{ value: 'hyperbola', text: '双曲线型 (Δ₂>0)' }}, presetSel);
+    const presetVal = el('div', {{ class: 'control-value', text: '' }}, presetRow);
+
+    let A = 5.0, B = 4.0, C = 10.0;
+    let D = 0.0, E = 0.0, F = -1.0;
+    let thetaDeg = 10.0;
+    let suspend = false;
+
+    function maybeRedraw() {{
+      if (!suspend) redraw();
+    }}
+
+    const ASlider = buildSliderRow(controls, {{
+      label: 'A',
+      min: -12.0,
+      max: 12.0,
+      step: 0.1,
+      value: A,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => {{ A = v; maybeRedraw(); }},
+    }});
+    const BSlider = buildSliderRow(controls, {{
+      label: 'B',
+      min: -12.0,
+      max: 12.0,
+      step: 0.1,
+      value: B,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => {{ B = v; maybeRedraw(); }},
+    }});
+    const CSlider = buildSliderRow(controls, {{
+      label: 'C',
+      min: -12.0,
+      max: 12.0,
+      step: 0.1,
+      value: C,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => {{ C = v; maybeRedraw(); }},
+    }});
+    const thetaSlider = buildSliderRow(controls, {{
+      label: 'θ（旋转角）',
+      min: -45.0,
+      max: 45.0,
+      step: 0.1,
+      value: thetaDeg,
+      format: (d) => `${{fmt(d, 1)}}° (≈ ${{fmt(d * Math.PI / 180, 3)}} rad)`,
+      onInput: (d) => {{ thetaDeg = d; maybeRedraw(); }},
+    }});
+
+    const jumpRow = el('div', {{ class: 'control-row' }}, controls);
+    el('div', {{ class: 'control-label', text: '快捷' }}, jumpRow);
+    const jumpBtn = el('button', {{ class: 'control-btn', type: 'button', text: '设为 θ*（消去 xy）' }}, jumpRow);
+    const jumpVal = el('div', {{ class: 'control-value', text: '' }}, jumpRow);
+
+    const axX = svg('line', {{ class: 'axis' }}, svgRoot);
+    const axY = svg('line', {{ class: 'axis' }}, svgRoot);
+    const axU = svg('line', {{ class: 'axis-rot' }}, svgRoot);
+    const axV = svg('line', {{ class: 'axis-rot' }}, svgRoot);
+    const lblX = svg('text', {{ class: 'axis-label' }}, svgRoot);
+    const lblY = svg('text', {{ class: 'axis-label' }}, svgRoot);
+    const lblU = svg('text', {{ class: 'axis-label-rot' }}, svgRoot);
+    const lblV = svg('text', {{ class: 'axis-label-rot' }}, svgRoot);
+    lblX.textContent = 'x';
+    lblY.textContent = 'y';
+    lblU.textContent = 'u';
+    lblV.textContent = 'v';
+
+    function setLabel(node, p) {{
+      node.setAttribute('x', String(p.x));
+      node.setAttribute('y', String(-p.y));
+      node.setAttribute('text-anchor', 'middle');
+      node.setAttribute('dominant-baseline', 'middle');
+      node.setAttribute('font-size', '13px');
+    }}
+
+    function classify(delta2) {{
+      if (Math.abs(delta2) < 1e-12) return 'parabola-type (Δ₂=0)';
+      return delta2 < 0 ? 'ellipse-type (Δ₂<0)' : 'hyperbola-type (Δ₂>0)';
+    }}
+
+    function implicitConicPath(coeff, bounds, steps) {{
+      // Marching-squares for f(x,y)=0. Returns a single SVG path with many short segments.
+      const xmin = bounds.xmin, xmax = bounds.xmax, ymin = bounds.ymin, ymax = bounds.ymax;
+      const nx = steps, ny = steps;
+      const dx = (xmax - xmin) / nx;
+      const dy = (ymax - ymin) / ny;
+
+      const vals = new Float64Array((nx + 1) * (ny + 1));
+      function f(x, y) {{
+        return coeff.A * x * x + coeff.B * x * y + coeff.C * y * y + coeff.D * x + coeff.E * y + coeff.F;
+      }}
+      for (let j = 0; j <= ny; j++) {{
+        const y = ymin + j * dy;
+        for (let i = 0; i <= nx; i++) {{
+          const x = xmin + i * dx;
+          vals[j * (nx + 1) + i] = f(x, y);
+        }}
+      }}
+      function v(i, j) {{ return vals[j * (nx + 1) + i]; }}
+      function interp(p1, p2, a, b) {{
+        const t = a / (a - b);
+        return {{ x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) }};
+      }}
+      function edgePoint(edge, x, y, v0, v1, v2, v3) {{
+        if (edge === 0) return interp({{ x, y }}, {{ x: x + dx, y }}, v0, v1);
+        if (edge === 1) return interp({{ x: x + dx, y }}, {{ x: x + dx, y: y + dy }}, v1, v2);
+        if (edge === 2) return interp({{ x: x + dx, y: y + dy }}, {{ x, y: y + dy }}, v2, v3);
+        return interp({{ x, y: y + dy }}, {{ x, y }}, v3, v0);
+      }}
+
+      let d = '';
+      for (let j = 0; j < ny; j++) {{
+        const y = ymin + j * dy;
+        for (let i = 0; i < nx; i++) {{
+          const x = xmin + i * dx;
+          const v0 = v(i, j);
+          const v1 = v(i + 1, j);
+          const v2 = v(i + 1, j + 1);
+          const v3 = v(i, j + 1);
+
+          let idx = 0;
+          if (v0 > 0) idx |= 1;
+          if (v1 > 0) idx |= 2;
+          if (v2 > 0) idx |= 4;
+          if (v3 > 0) idx |= 8;
+          if (idx === 0 || idx === 15) continue;
+
+          const segments = [];
+          if (idx === 5 || idx === 10) {{
+            const vc = f(x + dx * 0.5, y + dy * 0.5);
+            const centerPos = vc > 0;
+            if (idx === 5) {{
+              segments.push(centerPos ? [0, 1] : [0, 3]);
+              segments.push(centerPos ? [2, 3] : [1, 2]);
+            }} else {{
+              segments.push(centerPos ? [0, 3] : [0, 1]);
+              segments.push(centerPos ? [1, 2] : [2, 3]);
+            }}
+          }} else {{
+            const map = {{
+              1: [[3, 0]],
+              2: [[0, 1]],
+              3: [[3, 1]],
+              4: [[1, 2]],
+              6: [[0, 2]],
+              7: [[3, 2]],
+              8: [[2, 3]],
+              9: [[0, 2]],
+              11: [[1, 2]],
+              12: [[1, 3]],
+              13: [[0, 1]],
+              14: [[3, 0]],
+            }};
+            const seg = map[idx];
+            if (seg) segments.push(...seg);
+          }}
+
+          for (const [e1, e2] of segments) {{
+            const p = edgePoint(e1, x, y, v0, v1, v2, v3);
+            const q = edgePoint(e2, x, y, v0, v1, v2, v3);
+            d += `M ${{p.x}} ${{-p.y}} L ${{q.x}} ${{-q.y}} `;
+          }}
+        }}
+      }}
+      return d;
+    }}
+
+    function rotateABC(A, B, C, thetaRad) {{
+      const c = Math.cos(thetaRad);
+      const s = Math.sin(thetaRad);
+      const c2 = c * c;
+      const s2 = s * s;
+      const cs = c * s;
+      const A1 = A * c2 + B * cs + C * s2;
+      const C1 = A * s2 - B * cs + C * c2;
+      const B1 = (C - A) * (2 * cs) + B * (c2 - s2);
+      return {{ A1, B1, C1 }};
+    }}
+
+    function thetaStarDegFor(A, B, C) {{
+      // Solve tan(2θ) = B/(A-C), then map to [-45°, 45°] (solutions differ by 90°).
+      let deg = 0.5 * Math.atan2(B, A - C) * 180 / Math.PI;
+      while (deg > 45) deg -= 90;
+      while (deg < -45) deg += 90;
+      return deg;
+    }}
+
+    function applyPreset(kind) {{
+      suspend = true;
+      if (kind === 'ellipse') {{
+        A = 5.0; B = 4.0; C = 10.0;
+        D = 0.0; E = 0.0; F = -1.0;
+        thetaDeg = 10.0;
+      }} else if (kind === 'parabola') {{
+        A = 1.0; B = 2.0; C = 1.0;
+        // A parabola example (non-center): (x+y)^2 = 8y  =>  x^2+2xy+y^2-8y=0
+        D = 0.0; E = -8.0; F = 0.0;
+        thetaDeg = 15.0;
+      }} else {{
+        A = 2.0; B = 3.0; C = -1.0;
+        D = 0.0; E = 0.0; F = -1.0;
+        thetaDeg = 8.0;
+      }}
+      ASlider.value = String(A);
+      BSlider.value = String(B);
+      CSlider.value = String(C);
+      thetaSlider.value = String(thetaDeg);
+      // keep displayed values consistent
+      ASlider.__val.textContent = fmt(A, 2);
+      BSlider.__val.textContent = fmt(B, 2);
+      CSlider.__val.textContent = fmt(C, 2);
+      thetaSlider.__val.textContent = `${{fmt(thetaDeg, 1)}}° (≈ ${{fmt(thetaDeg * Math.PI / 180, 3)}} rad)`;
+      suspend = false;
+      redraw();
+    }}
+
+    function redraw() {{
+      const thetaRad = thetaDeg * Math.PI / 180;
+      const delta2 = B * B - 4 * A * C;
+      const kind = classify(delta2);
+      presetVal.textContent = kind;
+
+      // Draw a visible conic in the background (fixed in x-y). We scale the constant term
+      // so that the curve stays within view when A,B,C change.
+      const Qtr = A + C;
+      const disc = Math.sqrt((A - C) * (A - C) + B * B);
+      const lam1 = 0.5 * (Qtr + disc);
+      const lam2 = 0.5 * (Qtr - disc);
+      const target = 4.2;
+      let scaleF = F;
+      if (Math.abs(D) < 1e-12 && Math.abs(E) < 1e-12) {{
+        // Pure quadratic: A x^2 + Bxy + C y^2 + F = 0  =>  x^T Q x = -F.
+        // Pick -F so that a typical intercept is ~target.
+        const pos = Math.max(lam1, lam2);
+        const neg = Math.min(lam1, lam2);
+        if (pos > 1e-12 && neg > 1e-12) {{
+          scaleF = -target * target * Math.min(lam1, lam2);
+        }} else if (pos > 1e-12 && neg < -1e-12) {{
+          scaleF = -target * target * pos;
+        }} else if (pos < -1e-12 && neg < -1e-12) {{
+          scaleF = target * target * Math.max(lam1, lam2); // make RHS negative
+        }} else {{
+          scaleF = -1.0;
+        }}
+      }}
+
+      const bounds = {{ xmin: -6.2, xmax: 6.2, ymin: -6.2, ymax: 6.2 }};
+      const pathD = implicitConicPath({{
+        A, B, C,
+        D, E,
+        F: (Math.abs(D) < 1e-12 && Math.abs(E) < 1e-12) ? scaleF : F,
+      }}, bounds, 110);
+      conicPath.setAttribute('d', pathD);
+
+      const thetaStarDeg = thetaStarDegFor(A, B, C);
+      const thetaStar = thetaStarDeg * Math.PI / 180;
+      jumpVal.textContent = `θ*≈${{fmt(thetaStarDeg, 3)}}°`;
+
+      const r = rotateABC(A, B, C, thetaRad);
+      const delta2p = r.B1 * r.B1 - 4 * r.A1 * r.C1;
+      const invErr = delta2p - delta2;
+
+      const rStar = rotateABC(A, B, C, thetaStar);
+      const bStar = rStar.B1;
+
+      // axes drawing
+      const L = 5.2;
+      const bx = {{ x: L, y: 0 }};
+      const by = {{ x: 0, y: L }};
+      lineFromPoints(axX, {{ x: -L, y: 0 }}, {{ x: L, y: 0 }});
+      lineFromPoints(axY, {{ x: 0, y: -L }}, {{ x: 0, y: L }});
+      const cu = Math.cos(thetaRad), su = Math.sin(thetaRad);
+      const uEnd = {{ x: L * cu, y: L * su }};
+      const vEnd = {{ x: -L * su, y: L * cu }};
+      lineFromPoints(axU, {{ x: -uEnd.x, y: -uEnd.y }}, uEnd);
+      lineFromPoints(axV, {{ x: -vEnd.x, y: -vEnd.y }}, vEnd);
+      setLabel(lblX, {{ x: bx.x * 1.02, y: 0.18 }});
+      setLabel(lblY, {{ x: 0.18, y: by.y * 1.02 }});
+      setLabel(lblU, {{ x: uEnd.x * 1.02, y: uEnd.y * 1.02 }});
+      setLabel(lblV, {{ x: vEnd.x * 1.02, y: vEnd.y * 1.02 }});
+      setViewBox(svgRoot, bounds, 0.2);
+
+      readout.innerHTML = `
+        <div><span class="k">原系数</span>：A=${{fmt(A, 4)}}, B=${{fmt(B, 4)}}, C=${{fmt(C, 4)}}；<span class="k">Δ₂</span>=B²−4AC=${{fmt(delta2, 6)}}（${{kind}}）</div>
+        <div><span class="k">θ*</span>（使 B\\'(θ*)=0）：θ*=${{fmt(thetaStarDeg, 4)}}°；此时 <span class="k">B\\'(θ*)</span>≈${{fmt(bStar, 6)}}</div>
+        <div><span class="k">当前 θ</span>=${{fmt(thetaDeg, 3)}}°：A\\'=${{fmt(r.A1, 6)}}, B\\'=${{fmt(r.B1, 6)}}, C\\'=${{fmt(r.C1, 6)}}；<span class="k">Δ₂\\'</span>=${{fmt(delta2p, 6)}}，误差 Δ₂\\'−Δ₂=${{fmt(invErr, 8)}}</div>
+      `;
+    }}
+
+    jumpBtn.addEventListener('click', () => {{
+      thetaDeg = thetaStarDegFor(A, B, C);
+      thetaSlider.value = String(thetaDeg);
+      thetaSlider.__val.textContent = `${{fmt(thetaDeg, 1)}}° (≈ ${{fmt(thetaDeg * Math.PI / 180, 3)}} rad)`;
+      redraw();
+    }});
+
+    presetSel.addEventListener('change', () => applyPreset(presetSel.value));
+    applyPreset('ellipse');
+  }}
+
+  function mountReflectionUnified() {{
+    const container = document.getElementById('widget-reflection-unified');
+    if (!container) return;
+    container.innerHTML = '';
+    container.classList.add('widget');
+
+    el('div', {{
+      class: 'widget-title',
+      text: '反射性质（统一）：从焦点发出的光线在曲线上反射（滑块调参/选点）',
+    }}, container);
+
+    const controls = el('div', {{ class: 'widget-controls' }}, container);
+    const svgRoot = svg('svg', {{ class: 'conic-svg', role: 'img' }}, container);
+    const readout = el('div', {{ class: 'widget-readout' }}, container);
+
+    const typeRow = el('div', {{ class: 'control-row' }}, controls);
+    el('div', {{ class: 'control-label', text: '曲线类型' }}, typeRow);
+    const typeSel = el('select', {{ class: 'control-select' }}, typeRow);
+    el('option', {{ value: 'ellipse', text: '椭圆：F₁→P→F₂' }}, typeSel);
+    el('option', {{ value: 'parabola', text: '抛物线：F→P→平行轴' }}, typeSel);
+    el('option', {{ value: 'hyperbola', text: '双曲线：F₁→P→(虚像 F₂)' }}, typeSel);
+    const typeVal = el('div', {{ class: 'control-value', text: '' }}, typeRow);
+
+    const branchRow = el('div', {{ class: 'control-row' }}, controls);
+    el('div', {{ class: 'control-label', text: '双曲线分支' }}, branchRow);
+    const branchSel = el('select', {{ class: 'control-select' }}, branchRow);
+    el('option', {{ value: 'right', text: '右支' }}, branchSel);
+    el('option', {{ value: 'left', text: '左支' }}, branchSel);
+    const branchVal = el('div', {{ class: 'control-value', text: '' }}, branchRow);
+
+    let a = 4.2;
+    let b = 2.6;
+    let p = 2.0;
+    let param = 1.0;
+
+    const aSlider = buildSliderRow(controls, {{
+      label: 'a',
+      min: 1.2,
+      max: 7.0,
+      step: 0.05,
+      value: a,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => {{ a = v; redraw(); }},
+    }});
+    const bSlider = buildSliderRow(controls, {{
+      label: 'b',
+      min: 0.6,
+      max: 6.5,
+      step: 0.05,
+      value: b,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => {{ b = v; redraw(); }},
+    }});
+    const pSlider = buildSliderRow(controls, {{
+      label: 'p（抛物线 y²=4px）',
+      min: 0.6,
+      max: 5.0,
+      step: 0.05,
+      value: p,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => {{ p = v; redraw(); }},
+    }});
+
+    const paramOpts = {{
+      label: '参数',
+      min: 0,
+      max: (2 * Math.PI).toFixed(4),
+      step: 0.01,
+      value: param,
+      format: (t) => `${{fmt(t, 3)}}`,
+      onInput: (v) => {{ param = v; redraw(); }},
+    }};
+    const paramSlider = buildSliderRow(controls, paramOpts);
+
+    function setParamConfig(cfg) {{
+      paramSlider.__label.textContent = cfg.label;
+      paramSlider.min = String(cfg.min);
+      paramSlider.max = String(cfg.max);
+      paramSlider.step = String(cfg.step);
+      paramSlider.value = String(cfg.value);
+      paramOpts.format = cfg.format;
+      paramSlider.__val.textContent = paramOpts.format
+        ? paramOpts.format(Number(paramSlider.value))
+        : String(paramSlider.value);
+    }}
+
+    function updateUI() {{
+      const type = typeSel.value;
+      typeVal.textContent = '';
+      branchVal.textContent = '';
+      aSlider.__row.style.display = type === 'parabola' ? 'none' : 'grid';
+      bSlider.__row.style.display = type === 'parabola' ? 'none' : 'grid';
+      pSlider.__row.style.display = type === 'parabola' ? 'grid' : 'none';
+      branchRow.style.display = type === 'hyperbola' ? 'grid' : 'none';
+
+      if (type === 'ellipse') {{
+        setParamConfig({{
+          label: 't（角参数）',
+          min: 0,
+          max: 2 * Math.PI,
+          step: 0.01,
+          value: Number(paramSlider.value) % (2 * Math.PI),
+          format: (t) => `${{fmt(t, 3)}} rad  (≈ ${{fmt(t * 180 / Math.PI, 1)}}°)`,
+        }});
+      }} else if (type === 'parabola') {{
+        setParamConfig({{
+          label: 't（参数点）',
+          min: -3.5,
+          max: 3.5,
+          step: 0.01,
+          value: Math.max(-3.5, Math.min(3.5, Number(paramSlider.value))),
+          format: (t) => fmt(t, 2),
+        }});
+      }} else {{
+        setParamConfig({{
+          label: 'u（双曲参数）',
+          min: -2.0,
+          max: 2.0,
+          step: 0.01,
+          value: Math.max(-2.0, Math.min(2.0, Number(paramSlider.value))),
+          format: (u) => fmt(u, 2),
+        }});
+      }}
+    }}
+
+    function dot(u, v) {{ return u.x * v.x + u.y * v.y; }}
+    function norm(u) {{ return Math.hypot(u.x, u.y); }}
+    function unit(u) {{
+      const n = norm(u);
+      return n > 1e-12 ? {{ x: u.x / n, y: u.y / n }} : {{ x: 0, y: 0 }};
+    }}
+    function add(u, v) {{ return {{ x: u.x + v.x, y: u.y + v.y }}; }}
+    function sub(u, v) {{ return {{ x: u.x - v.x, y: u.y - v.y }}; }}
+    function mul(u, k) {{ return {{ x: u.x * k, y: u.y * k }}; }}
+    function reflect(v, nHat) {{
+      const d = dot(v, nHat);
+      return sub(v, mul(nHat, 2 * d));
+    }}
+    function clamp(x, lo, hi) {{ return Math.max(lo, Math.min(hi, x)); }}
+    function angleDeg(u, v) {{
+      const nu = norm(u), nv = norm(v);
+      if (nu < 1e-12 || nv < 1e-12) return NaN;
+      const c = clamp(dot(u, v) / (nu * nv), -1, 1);
+      return Math.acos(c) * 180 / Math.PI;
+    }}
+
+    // SVG elements
+    const curve1 = svg('path', {{ class: 'curve' }}, svgRoot);
+    const curve2 = svg('path', {{ class: 'curve-alt' }}, svgRoot);
+    const tangent = svg('line', {{ class: 'tangent2' }}, svgRoot);
+    const rayIn = svg('line', {{ class: 'seg' }}, svgRoot);
+    const rayOut = svg('line', {{ class: 'seg2' }}, svgRoot);
+    const rayPred = svg('line', {{ class: 'seg3' }}, svgRoot);
+    const cF1 = svg('circle', {{ class: 'focus', r: 0.12 }}, svgRoot);
+    const cF2 = svg('circle', {{ class: 'focus', r: 0.12 }}, svgRoot);
+    const cP = svg('circle', {{ class: 'point', r: 0.14 }}, svgRoot);
+
+    function redraw() {{
+      const type = typeSel.value;
+      a = Number(aSlider.value);
+      b = Number(bSlider.value);
+      p = Number(pSlider.value);
+      param = Number(paramSlider.value);
+
+      if (type === 'ellipse') {{
+        if (b >= a) {{
+          b = a * 0.95;
+          bSlider.value = String(b);
+          bSlider.__val.textContent = fmt(b, 2);
+        }}
+      }}
+
+      let pts1 = [];
+      let pts2 = [];
+      let P = {{ x: 0, y: 0 }};
+      let Fsrc = {{ x: 0, y: 0 }};
+      let Fother = {{ x: 0, y: 0 }};
+      let n = {{ x: 0, y: 0 }};
+      let vPred = {{ x: 1, y: 0 }};
+      let predLabel = '';
+
+      if (type === 'ellipse') {{
+        const N = 520;
+        for (let i = 0; i <= N; i++) {{
+          const t = (i / N) * 2 * Math.PI;
+          pts1.push({{ x: a * Math.cos(t), y: b * Math.sin(t) }});
+        }}
+        P = {{ x: a * Math.cos(param), y: b * Math.sin(param) }};
+        const c = Math.sqrt(Math.max(a * a - b * b, 0));
+        Fsrc = {{ x: -c, y: 0 }};
+        Fother = {{ x: c, y: 0 }};
+        n = {{ x: P.x / (a * a), y: P.y / (b * b) }};
+        vPred = sub(Fother, P); // P -> F2
+        predLabel = '应当指向 F₂';
+        curve1.setAttribute('d', pathFromWorld(pts1));
+        curve2.setAttribute('d', '');
+      }} else if (type === 'parabola') {{
+        const tMax = 3.5;
+        const N = 520;
+        for (let i = 0; i <= N; i++) {{
+          const t = -tMax + (2 * tMax * i) / N;
+          pts1.push({{ x: p * t * t, y: 2 * p * t }});
+        }}
+        P = {{ x: p * param * param, y: 2 * p * param }};
+        Fsrc = {{ x: p, y: 0 }};
+        Fother = {{ x: p, y: 0 }};
+        n = {{ x: -4 * p, y: 2 * P.y }};
+        vPred = {{ x: 1, y: 0 }}; // parallel to axis
+        predLabel = '应当平行于轴 (+x)';
+        curve1.setAttribute('d', pathFromWorld(pts1));
+        curve2.setAttribute('d', '');
+      }} else {{
+        const U = 2.0;
+        const N = 520;
+        for (let i = 0; i <= N; i++) {{
+          const u = -U + (2 * U * i) / N;
+          const x = a * Math.cosh(u);
+          const y = b * Math.sinh(u);
+          pts1.push({{ x, y }});
+          pts2.push({{ x: -x, y }});
+        }}
+        const side = branchSel.value === 'left' ? -1 : 1;
+        P = {{ x: side * a * Math.cosh(param), y: b * Math.sinh(param) }};
+        const c = Math.hypot(a, b);
+        Fsrc = {{ x: side * c, y: 0 }};
+        Fother = {{ x: -side * c, y: 0 }};
+        n = {{ x: P.x / (a * a), y: -P.y / (b * b) }};
+        vPred = sub(P, Fother); // from Fother to P (virtual origin)
+        predLabel = '反射后“好像来自”F₂';
+        curve1.setAttribute('d', pathFromWorld(pts1));
+        curve2.setAttribute('d', pathFromWorld(pts2));
+      }}
+
+      const vIn = unit(sub(P, Fsrc));
+      const nHat = unit(n);
+      const vOut = unit(reflect(vIn, nHat));
+      const vPredHat = unit(vPred);
+      const angErr = angleDeg(vOut, vPredHat);
+
+      // tangent line via normal
+      const tHat = unit({{ x: -nHat.y, y: nHat.x }});
+      const Lt = 5.0;
+      lineFromPoints(tangent, sub(P, mul(tHat, Lt)), add(P, mul(tHat, Lt)));
+
+      // rays
+      lineFromPoints(rayIn, Fsrc, P);
+      const Lray = 6.5;
+      lineFromPoints(rayOut, P, add(P, mul(vOut, Lray)));
+      lineFromPoints(rayPred, P, add(P, mul(vPredHat, Lray)));
+
+      // points
+      circleAt(cF1, Fsrc);
+      circleAt(cF2, Fother);
+      circleAt(cP, P);
+      cF2.setAttribute('display', type === 'parabola' ? 'none' : 'inline');
+
+      // viewBox
+      const allPts = [...pts1, ...pts2, P, Fsrc, Fother, add(P, mul(vOut, Lray)), add(P, mul(vPredHat, Lray))];
+      const bnd = worldBounds(allPts);
+      setViewBox(svgRoot, bnd, 1.2);
+
+      const typeText =
+        type === 'ellipse' ? '椭圆' : (type === 'parabola' ? '抛物线' : (branchSel.value === 'left' ? '双曲线（左支）' : '双曲线（右支）'));
+      readout.innerHTML = `
+        <div><span class="k">类型</span>：${{typeText}}｜<span class="k">P</span>=(${{fmt(P.x, 4)}}, ${{fmt(P.y, 4)}})</div>
+        <div><span class="k">入射</span>：F₁→P（橙）｜<span class="k">反射</span>（绿） vs <span class="k">性质预测</span>（紫）</div>
+        <div><span class="k">预测</span>：${{predLabel}}；角度误差 ≈ ${{Number.isFinite(angErr) ? fmt(angErr, 6) : '—'}}°（越接近 0 越吻合）</div>
+      `;
+    }}
+
+    typeSel.addEventListener('change', () => {{ updateUI(); redraw(); }});
+    branchSel.addEventListener('change', redraw);
+
+    updateUI();
+    redraw();
+  }}
+
   function init() {{
     mountExampleA();
     mountParabola();
     mountHyperbola();
     mountDirectorCircle();
     mountConeUnified();
+    mountEccentricityDirectrix();
+    mountRotationABC();
+    mountReflectionUnified();
   }}
 
   if (document.readyState === 'loading') {{
@@ -1841,6 +2806,7 @@ def _render_html(md: str, title: str, interactive_js: str) -> str:
         ],
     )
     body = _collapse_code_blocks(body)
+    body = _collapse_zugeng_principle(body)
 
     return f"""<!doctype html>
 <html lang="zh">
@@ -1974,6 +2940,20 @@ def _render_html(md: str, title: str, interactive_js: str) -> str:
       details.codeblock pre {{
         margin: 0;
         border-radius: 0 0 10px 10px;
+      }}
+      details.fold {{
+        margin: 0.8rem 0 1.2rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--card) 75%, transparent);
+        padding: 0.3rem 0.6rem;
+      }}
+      details.fold > summary {{
+        cursor: pointer;
+        font-weight: 650;
+        color: var(--muted);
+        padding: 0.35rem 0.2rem;
+        user-select: none;
       }}
       .widget {{
         border: 1px solid var(--border);
@@ -2124,6 +3104,48 @@ def _render_html(md: str, title: str, interactive_js: str) -> str:
         vector-effect: non-scaling-stroke;
         opacity: 0.9;
       }}
+      .tangent2 {{
+        stroke: color-mix(in srgb, var(--muted) 85%, var(--fg));
+        stroke-width: 1.2;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.85;
+        stroke-dasharray: 6 6;
+      }}
+      .axis {{
+        stroke: color-mix(in srgb, var(--muted) 85%, var(--fg));
+        stroke-width: 1.1;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.85;
+      }}
+      .axis-rot {{
+        stroke: color-mix(in srgb, var(--link) 78%, var(--fg));
+        stroke-width: 1.15;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.92;
+      }}
+      .axis-label {{
+        fill: var(--muted);
+        font-size: 13px;
+        font-weight: 650;
+      }}
+      .axis-label-rot {{
+        fill: color-mix(in srgb, var(--link) 78%, var(--fg));
+        font-size: 13px;
+        font-weight: 650;
+      }}
+      .control-btn {{
+        width: 100%;
+        padding: 7px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: color-mix(in srgb, var(--card) 72%, var(--bg));
+        color: var(--fg);
+        font-weight: 650;
+        cursor: pointer;
+      }}
+      .control-btn:hover {{
+        background: color-mix(in srgb, var(--card) 86%, var(--bg));
+      }}
       .meta {{
         color: var(--muted);
         font-size: 0.95em;
@@ -2180,6 +3202,7 @@ def main() -> int:
     processed_md += _build_generated_section(exa, exb, hyp)
     processed_md += _build_extra_formula_table_markdown()
     processed_md += _build_polar_section_markdown()
+    processed_md += _build_determinant_appendix_markdown()
     processed_md = _escape_markdown_emphasis_in_math(processed_md)
 
     html = _render_html(processed_md, title=args.title, interactive_js=_interactive_js(exa))

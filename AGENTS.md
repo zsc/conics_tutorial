@@ -74,6 +74,10 @@ Q=\begin{pmatrix}A&\frac B2\ \frac B2&C\end{pmatrix},\
 [
 \frac{x^2}{a^2}+\frac{y^2}{b^2}=1,\quad a\ge b>0
 ]
+参数式（常用）：
+[
+x=a\cos t,\quad y=b\sin t,\quad 0\le t<2\pi
+]
 焦距参数：
 [
 c^2=a^2-b^2,\quad e=\frac ca
@@ -94,6 +98,28 @@ x=\pm\frac{a}{e}=\pm\frac{a^2}{c}
 [
 S=\pi ab
 ]
+祖暅原理（Cavalieri/“截面积守恒”思想）的一个推导思路（平面版）：
+
+把椭圆域
+[
+E:\ \frac{x^2}{a^2}+\frac{y^2}{b^2}\le 1
+]
+与单位圆盘
+[
+D:\ x^2+y^2\le 1
+]
+作比较。令 (y=bt)（(t\in[-1,1])），则椭圆在高度 (y) 处的水平截线长度为
+[
+L_E(y)=2a\sqrt{1-\frac{y^2}{b^2}}=2a\sqrt{1-t^2}
+]
+而单位圆盘在高度 (t) 处的截线长度为
+[
+L_D(t)=2\sqrt{1-t^2}
+]
+于是对应“每一层截线长度成固定比例 (a)”且“高度参数再按 (b) 缩放”，面积按 (ab) 成比例：
+[
+S(E)=ab\,S(D)=ab\cdot\pi=\pi ab
+]
 切线（点 ((x_0,y_0)) 在椭圆上）：
 [
 \frac{xx_0}{a^2}+\frac{yy_0}{b^2}=1
@@ -104,6 +130,14 @@ S=\pi ab
 标准式：
 [
 \frac{x^2}{a^2}-\frac{y^2}{b^2}=1
+]
+参数式（常用）：
+[
+x=a\sec t,\quad y=b\tan t,\quad |t|<\frac{\pi}{2}
+]
+或（双曲函数参数）：
+[
+x=a\cosh u,\quad y=b\sinh u,\quad u\in\mathbb{R}
 ]
 [
 c^2=a^2+b^2,\quad e=\frac ca>1
@@ -391,4 +425,3 @@ plt.show()
 
 如果你希望我再补一份“更冷门但可用于解题的公式清单”（比如：极线极点的坐标算法、圆锥曲线的弦中点公式、过定点弦族的参数化、二次曲线的仿射不变量、圆锥曲线与直线交点的判别式与韦达关系、以及一批竞赛常见结论），我也可以按“**公式 → 适用场景 → 一行例题**”的格式继续整理。
 需要。
-

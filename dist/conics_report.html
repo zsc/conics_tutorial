@@ -1,0 +1,1577 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>圆锥曲线守恒式与关系式（图文报告）</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #111827;
+        --muted: #6b7280;
+        --card: #f8fafc;
+        --border: #e5e7eb;
+        --code-bg: #0b1020;
+        --code-fg: #e5e7eb;
+        --link: #2563eb;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b1020;
+          --fg: #e5e7eb;
+          --muted: #9ca3af;
+          --card: #111827;
+          --border: #1f2937;
+          --code-bg: #0b1020;
+          --code-fg: #e5e7eb;
+          --link: #60a5fa;
+        }
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      }
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 32px 18px 56px;
+      }
+      h1, h2, h3 {
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+      }
+      h1 { font-size: 2rem; margin: 0 0 0.6rem; }
+      h2 { font-size: 1.45rem; margin: 2.2rem 0 0.8rem; border-bottom: 1px solid var(--border); padding-bottom: .35rem; }
+      h3 { font-size: 1.15rem; margin: 1.6rem 0 0.6rem; }
+      p { margin: 0.75rem 0; }
+      a { color: var(--link); }
+      blockquote {
+        margin: 1rem 0;
+        padding: 0.1rem 1rem;
+        border-left: 4px solid var(--border);
+        color: var(--muted);
+        background: color-mix(in srgb, var(--card) 70%, transparent);
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 2rem 0;
+      }
+      pre {
+        background: var(--code-bg);
+        color: var(--code-fg);
+        padding: 14px 14px;
+        border-radius: 10px;
+        overflow: auto;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.92em;
+      }
+      pre code {
+        font-size: 0.9em;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.95em;
+      }
+      th, td {
+        border: 1px solid var(--border);
+        padding: 10px 10px;
+        vertical-align: top;
+      }
+      th {
+        background: color-mix(in srgb, var(--card) 80%, transparent);
+        text-align: left;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--card);
+      }
+      details.fallback {
+        margin: 0.8rem 0 1.2rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--card) 75%, transparent);
+        padding: 0.3rem 0.6rem;
+      }
+      details.fallback > summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--muted);
+        padding: 0.35rem 0.2rem;
+      }
+      details.codeblock {
+        margin: 1rem 0 1.2rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--card) 75%, transparent);
+      }
+      details.codeblock > summary {
+        cursor: pointer;
+        font-weight: 650;
+        padding: 10px 12px;
+        color: var(--muted);
+        user-select: none;
+      }
+      details.codeblock .codehilite {
+        margin: 0;
+        border-top: 1px solid var(--border);
+      }
+      details.codeblock pre {
+        margin: 0;
+        border-radius: 0 0 10px 10px;
+      }
+      .widget {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--card) 82%, transparent);
+        padding: 12px 12px 10px;
+        margin: 0.8rem 0 1.2rem;
+      }
+      .widget-title {
+        font-weight: 700;
+        margin: 2px 0 10px;
+        letter-spacing: -0.01em;
+      }
+      .widget-controls {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin: 0 0 10px;
+      }
+      .control-row {
+        display: grid;
+        grid-template-columns: 120px 1fr 160px;
+        gap: 10px;
+        align-items: center;
+      }
+      .control-label {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .control-value {
+        text-align: right;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.92em;
+        color: var(--muted);
+      }
+      .control-select {
+        width: 100%;
+        padding: 6px 8px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--fg);
+      }
+      .conic-svg {
+        width: 100%;
+        height: 420px;
+        display: block;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+      }
+      .widget-readout {
+        margin: 10px 2px 2px;
+        color: var(--muted);
+        font-size: 0.95em;
+      }
+      .widget-readout .k {
+        font-weight: 700;
+        color: var(--fg);
+      }
+      .curve {
+        fill: none;
+        stroke: color-mix(in srgb, var(--link) 85%, var(--fg));
+        stroke-width: 1.6;
+        vector-effect: non-scaling-stroke;
+      }
+      .seg {
+        stroke: color-mix(in srgb, #f59e0b 88%, var(--fg));
+        stroke-width: 1.4;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.9;
+      }
+      .seg2 {
+        stroke: color-mix(in srgb, #10b981 88%, var(--fg));
+        stroke-width: 1.4;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.9;
+      }
+      .focus {
+        fill: color-mix(in srgb, #ef4444 88%, var(--fg));
+        stroke: var(--bg);
+        stroke-width: 0.08;
+      }
+      .point {
+        fill: color-mix(in srgb, #2563eb 92%, var(--fg));
+        stroke: var(--bg);
+        stroke-width: 0.08;
+      }
+      .directrix {
+        stroke: color-mix(in srgb, var(--muted) 85%, var(--fg));
+        stroke-width: 1.2;
+        vector-effect: non-scaling-stroke;
+        stroke-dasharray: 6 6;
+      }
+      .asym {
+        stroke: color-mix(in srgb, var(--muted) 85%, var(--fg));
+        stroke-width: 1.1;
+        vector-effect: non-scaling-stroke;
+        stroke-dasharray: 6 6;
+      }
+      .dircircle {
+        fill: none;
+        stroke: color-mix(in srgb, #a855f7 82%, var(--fg));
+        stroke-width: 1.4;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.9;
+      }
+      .tangent {
+        stroke: color-mix(in srgb, #22c55e 82%, var(--fg));
+        stroke-width: 1.4;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.9;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.95em;
+        margin: 0 0 1.4rem;
+      }
+    </style>
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['\\(', '\\)'], ['$', '$']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  </head>
+  <body>
+    <main>
+      <div class="meta">Generated by <code>scripts/generate_conics_report.py</code></div>
+      <p>下面把<strong>圆锥曲线（椭圆/双曲线/抛物线）里“守恒式（更准确叫：在平移/旋转等坐标变换下不变的量、以及由定义带来的不变量）”</strong>和<strong>常用/冷门数学关系式</strong>做一个“可查表式”的总结，并给出<strong>解析几何算例</strong>与 <strong>Python 画图代码</strong>（可直接运行）。</p>
+
+<hr />
+
+<h2 id="1-最常用的守恒式-不变量解析几何最爱用的那批">1) 最常用的“守恒式 / 不变量”（解析几何最爱用的那批）</h2>
+
+<h3 id="11-二次曲线一般式与矩阵形式通用入口">1.1 二次曲线一般式与矩阵形式（通用入口）</h3>
+
+<p>一般二次曲线：
+$$
+Ax^2+Bxy+Cy^2+Dx+Ey+F=0
+$$
+矩阵写法（便于“守恒量”一眼看出）：
+$$
+\mathbf{x}^TQ\mathbf{x}+ \mathbf{p}^T\mathbf{x}+F=0,\quad
+Q=\begin{pmatrix}A&amp;\frac{B}{2}\\ \frac{B}{2}&amp;C\end{pmatrix},
+\mathbf{p}=\begin{pmatrix}D\\E\end{pmatrix}
+$$</p>
+
+<h3 id="12-分类判别式旋转不变最常用">1.2 分类判别式（旋转不变：最常用）</h3>
+
+<p>$$
+\Delta&#95;2 = B^2-4AC
+$$</p>
+
+<ul>
+<li>\(\Delta&#95;2&lt;0\)：椭圆型（可能是椭圆、圆、点、虚椭圆）</li>
+<li>\(\Delta&#95;2=0\)：抛物线型（可能退化成平行线/重线）</li>
+<li>\(\Delta&#95;2&gt;0\)：双曲线型（可能退化成两相交直线）</li>
+</ul>
+
+<blockquote>
+  <p>这是最常被称作“守恒”的：<strong>无论你怎么旋转坐标轴，\(B^2-4AC\) 不变</strong>（本质是 \(Q\) 的特征值符号结构不变）。</p>
+</blockquote>
+
+<h3 id="13-消去交叉项的旋转角常用">1.3 消去交叉项的旋转角（常用）</h3>
+
+<p>当 \(B\neq 0\)，旋转角 \(\theta\) 满足
+$$
+\tan 2\theta=\frac{B}{A-C}
+$$
+旋转后 (xy) 项消失。</p>
+
+<h3 id="14-二次型的特征值更本质的不变量">1.4 二次型的特征值（更“本质”的不变量）</h3>
+
+<p>\(Q\) 的特征值 \(\lambda&#95;1,\lambda&#95;2\)（以及它们的符号）在正交变换下不变。</p>
+
+<ul>
+<li>\(\text{tr}(Q)=A+C=\lambda&#95;1+\lambda&#95;2\)</li>
+<li>\(\det(Q)=AC-\frac{B^2}{4}=\lambda&#95;1\lambda&#95;2\)</li>
+</ul>
+
+<h3 id="15-中心存在性常用但容易忘">1.5 中心存在性（常用但容易忘）</h3>
+
+<p>二次曲线有“中心”（椭圆/双曲线及其退化）当且仅当线性方程组有解：
+$$
+\begin{pmatrix}2A&amp;B\\B&amp;2C\end{pmatrix}\begin{pmatrix}x&#95;0\\y&#95;0\end{pmatrix}=
+-\begin{pmatrix}D\\E\end{pmatrix}
+$$
+抛物线一般<strong>没有中心</strong>。</p>
+
+<hr />
+
+<h2 id="2-三大圆锥曲线的定义型守恒式距离和差离心率">2) 三大圆锥曲线的“定义型守恒式”（距离和/差、离心率）</h2>
+
+<h3 id="21-离心率统一定义超级常用">2.1 离心率统一定义（超级常用）</h3>
+
+<p>焦点—准线定义：
+$$
+\frac{\text{点到焦点距离}}{\text{点到准线距离}}=e
+$$</p>
+
+<ul>
+<li>椭圆：\(0&lt;e&lt;1\)</li>
+<li>抛物线：\(e=1\)</li>
+<li>双曲线：\(e&gt;1\)</li>
+</ul>
+
+<h3 id="22-椭圆最常用关系式">2.2 椭圆（最常用关系式）</h3>
+
+<p>标准式（主轴沿 x）：
+$$
+\frac{x^2}{a^2}+\frac{y^2}{b^2}=1,\quad a\ge b&gt;0
+$$
+焦距参数：
+$$
+c^2=a^2-b^2,\quad e=\frac ca
+$$
+<strong>距离和守恒（定义）</strong>：对任一点 \(P\)，
+$$
+PF&#95;1+PF&#95;2=2a
+$$
+准线：
+$$
+x=\pm\frac{a}{e}=\pm\frac{a^2}{c}
+$$
+半通径（latus rectum）：
+$$
+\ell=\frac{b^2}{a}
+$$
+面积（常用）：
+$$
+S=\pi ab
+$$
+切线（点 \((x&#95;0,y&#95;0)\) 在椭圆上）：
+$$
+\frac{xx&#95;0}{a^2}+\frac{yy&#95;0}{b^2}=1
+$$</p>
+
+<h3 id="23-双曲线最常用关系式">2.3 双曲线（最常用关系式）</h3>
+
+<p>标准式：
+$$
+\frac{x^2}{a^2}-\frac{y^2}{b^2}=1
+$$
+$$
+c^2=a^2+b^2,\quad e=\frac ca&gt;1
+$$
+<strong>距离差守恒（定义）</strong>：
+$$
+|PF&#95;1-PF&#95;2|=2a
+$$
+渐近线：
+$$
+y=\pm\frac ba x
+$$
+准线：
+$$
+x=\pm\frac{a}{e}=\pm\frac{a^2}{c}
+$$
+半通径：
+$$
+\ell=\frac{b^2}{a}
+$$
+切线（点 \((x&#95;0,y&#95;0)\) 在双曲线上）：
+$$
+\frac{xx&#95;0}{a^2}-\frac{yy&#95;0}{b^2}=1
+$$</p>
+
+<h3 id="24-抛物线最常用关系式">2.4 抛物线（最常用关系式）</h3>
+
+<p>标准式：
+$$
+y^2=4px\quad \(p&gt;0\)
+$$
+焦点、准线：
+$$
+F\(p,0\),\quad x=-p
+$$
+焦弦（过焦点的弦）长度常用结论：</p>
+
+<ul>
+<li><strong>通径（latus rectum）长</strong>：\(4p\)
+参数式（常用）：
+$$
+x=pt^2,\quad y=2pt
+$$
+切线（参数 \(t&#95;0\)）：
+$$
+ty = x + pt^2\quad\text{在 }t=t&#95;0\text{ 处 } \Rightarrow\ t&#95;0y=x+pt&#95;0^2
+$$</li>
+</ul>
+
+<hr />
+
+<h2 id="3-一些冷门但很好用很漂亮的关系式挑常见冷门">3) 一些“冷门但很好用/很漂亮”的关系式（挑常见冷门）</h2>
+
+<h3 id="31-共轭直径共轭弦椭圆双曲线">3.1 共轭直径/共轭弦（椭圆/双曲线）</h3>
+
+<p>对椭圆参数点 \(P(a\cos t, b\sin t)\)，其切线方向与“共轭直径”有经典对应（工程/几何优化里挺常用）。</p>
+
+<h3 id="32-反射性质焦点反射">3.2 反射性质（焦点反射）</h3>
+
+<ul>
+<li>椭圆：从一个焦点出发反射到另一焦点（入射角=反射角）</li>
+<li>抛物线：来自焦点的光线反射后平行于轴（以及反过来）</li>
+<li>双曲线：来自一个焦点反射后好像来自另一个焦点（“虚像”性质）</li>
+</ul>
+
+<h3 id="33-director-circle导圆较冷门">3.3 Director circle（导圆，较冷门）</h3>
+
+<ul>
+<li>椭圆 \(\frac{x^2}{a^2}+\frac{y^2}{b^2}=1\)：导圆 \(x^2+y^2=a^2+b^2\)</li>
+<li>双曲线 \(\frac{x^2}{a^2}-\frac{y^2}{b^2}=1\)：导圆 \(x^2+y^2=a^2-b^2\)（若 \(a&gt;b\) 才为实圆）</li>
+</ul>
+
+<p>导圆：满足“从该圆上点引曲线切线互相垂直”等等等价性质（竞赛/解析几何题偶尔出现）。</p>
+
+<h3 id="34-极线极点更偏射影几何但解析几何也能算">3.4 极线/极点（更偏射影几何，但解析几何也能算）</h3>
+
+<p>对二次曲线 \(X^TAX=0\)，点 \(P\) 的极线可用 \(P^TA X=0\) 表达（坐标齐次形式）。对求切线、判定共线很强。</p>
+
+<hr />
+
+<h2 id="4-解析几何算例带完整步骤思路">4) 解析几何算例（带完整步骤思路）</h2>
+
+<h3 id="算例-a把一般二次曲线化到标准形并提取几何量">算例 A：把一般二次曲线化到标准形并提取几何量</h3>
+
+<p>给：
+$$
+9x^2+4xy+6y^2-54x-24y+36=0
+$$
+<strong>\(1\) 分类：</strong>
+\(\Delta&#95;2=B^2-4AC=4^2-4\cdot 9\cdot 6=16-216=-200&lt;0\)
+所以是<strong>椭圆型</strong>（或退化椭圆）。</p>
+
+<p><strong>\(2\) 旋转去掉 (xy)：</strong>
+$$
+\tan 2\theta=\frac{B}{A-C}=\frac{4}{9-6}=\frac{4}{3}
+$$
+取 \(\theta\) 满足即可（Python 里可直接算数值）。</p>
+
+<p><strong>\(3\) 平移到中心：</strong>
+解
+$$
+\begin{pmatrix}18&amp;4\\4&amp;12\end{pmatrix}\begin{pmatrix}x&#95;0\\y&#95;0\end{pmatrix}=
+\begin{pmatrix}54\\24\end{pmatrix}
+$$
+得到中心 \((x&#95;0,y&#95;0)\)（Python 一行线代就能解）。</p>
+
+<p><strong>\(4\) 得到标准式参数 (a,b) 与主轴方向：</strong>
+用特征值分解得到旋转后的二次项系数，再结合常数项得到 \(a^2,b^2\)。
+下面 Python 会把这些全部算出来并画图（含中心/主轴）。</p>
+
+<hr />
+
+<h3 id="算例-b抛物线切线焦点准线与守恒式验证">算例 B：抛物线切线、焦点、准线与“守恒式”验证</h3>
+
+<p>取 \(y^2=8x\)，即 \(4p=8\Rightarrow p=2\)。</p>
+
+<ul>
+<li>焦点：\(F(2,0)\)</li>
+<li>准线：\(x=-2\)</li>
+<li>任一点 (P(x,y)) 在抛物线上满足
+$$
+PF=\text{到准线距离} \quad\(\text{离心率 }e=1\)
+$$
+再取参数点 \(t=1\)：\(P(pt^2,2pt)=(2,4)\)。
+可直接数值验证 (PF) 与 \(x\) 到 \(-2\) 的距离相等。
+切线：\(t y = x + pt^2\Rightarrow 1\cdot y=x+2\)。</li>
+</ul>
+
+<hr />
+
+<h2 id="5-python-画图与自动化提取参数可直接运行">5) Python 画图与自动化提取参数（可直接运行）</h2>
+
+<p>下面代码会做三件事：</p>
+
+<ol>
+<li>对算例 A 自动：分类、求中心、求旋转角、化标准式参数，并画出椭圆</li>
+<li>对算例 B 画抛物线、焦点、准线、某点切线，并验证 \(PF=\)到准线距离</li>
+<li>顺带画一个标准双曲线示例（带渐近线、焦点）</li>
+</ol>
+
+<details class="codeblock"><summary>代码（点击展开）</summary><div class="codehilite">
+<pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="c1"># -----------------------------</span>
+<span class="c1"># Helper: classify conic by invariants</span>
+<span class="c1"># -----------------------------</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">classify_conic</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="n">E</span><span class="p">,</span><span class="n">F</span><span class="p">):</span>
+    <span class="n">disc</span> <span class="o">=</span> <span class="n">B</span><span class="o">*</span><span class="n">B</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">C</span>
+    <span class="k">if</span> <span class="n">disc</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;ellipse-type (disc&lt;0)&quot;</span>
+    <span class="k">elif</span> <span class="n">disc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;parabola-type (disc=0)&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;hyperbola-type (disc&gt;0)&quot;</span>
+    <span class="k">return</span> <span class="n">disc</span><span class="p">,</span> <span class="n">kind</span>
+
+<span class="c1"># -----------------------------</span>
+<span class="c1"># Example A: 9x^2 + 4xy + 6y^2 -54x -24y +36 = 0</span>
+<span class="c1"># Use matrix form x^T Q x + p^T x + F = 0</span>
+<span class="c1"># -----------------------------</span>
+<span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="n">E</span><span class="p">,</span><span class="n">F0</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="o">-</span><span class="mi">54</span><span class="p">,</span><span class="o">-</span><span class="mi">24</span><span class="p">,</span><span class="mi">36</span>
+<span class="n">disc</span><span class="p">,</span> <span class="n">kind</span> <span class="o">=</span> <span class="n">classify_conic</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="n">E</span><span class="p">,</span><span class="n">F0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Example A discriminant B^2-4AC =&quot;</span><span class="p">,</span> <span class="n">disc</span><span class="p">,</span> <span class="s2">&quot;=&gt;&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="o">/</span><span class="mi">2</span><span class="p">],</span>
+              <span class="p">[</span><span class="n">B</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">C</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">D</span><span class="p">,</span> <span class="n">E</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+<span class="c1"># Center exists if [2A B; B 2C] is invertible and solution exists</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">2</span><span class="o">*</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">],</span>
+              <span class="p">[</span><span class="n">B</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">C</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+<span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="o">-</span><span class="n">p</span><span class="p">)</span>
+<span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">center</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Example A center (x0,y0) =&quot;</span><span class="p">,</span> <span class="n">center</span><span class="p">)</span>
+
+<span class="c1"># Rotate to diagonalize Q: eigen-decomposition gives principal axes</span>
+<span class="n">eigvals</span><span class="p">,</span> <span class="n">eigvecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>  <span class="c1"># Q = V diag(lam) V^T</span>
+<span class="c1"># In rotated coords u = V^T (x - center)</span>
+<span class="n">lam1</span><span class="p">,</span> <span class="n">lam2</span> <span class="o">=</span> <span class="n">eigvals</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">eigvecs</span>
+
+<span class="c1"># Compute constant after completing square: (x-center)^T Q (x-center) = -F&#39;</span>
+<span class="c1"># Original: x^T Q x + p^T x + F0 = 0</span>
+<span class="c1"># At center, gradient zero, so value at center gives F&#39;</span>
+<span class="n">F_at_center</span> <span class="o">=</span> <span class="p">(</span><span class="n">center</span> <span class="o">@</span> <span class="n">Q</span> <span class="o">@</span> <span class="n">center</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">p</span> <span class="o">@</span> <span class="n">center</span><span class="p">)</span> <span class="o">+</span> <span class="n">F0</span>
+<span class="c1"># In shifted coords z = x-center, equation: z^T Q z + F_at_center = 0</span>
+<span class="c1"># Rotate: u^T diag(lam) u + F_at_center = 0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Example A value at center (should be &lt;=0 for real ellipse):&quot;</span><span class="p">,</span> <span class="n">F_at_center</span><span class="p">)</span>
+
+<span class="c1"># For ellipse: lam1 u1^2 + lam2 u2^2 = -F_at_center</span>
+<span class="n">rhs</span> <span class="o">=</span> <span class="o">-</span><span class="n">F_at_center</span>
+<span class="n">a2</span> <span class="o">=</span> <span class="n">rhs</span><span class="o">/</span><span class="n">lam1</span>
+<span class="n">b2</span> <span class="o">=</span> <span class="n">rhs</span><span class="o">/</span><span class="n">lam2</span>
+<span class="c1"># a is sqrt(max), b is sqrt(min) in geometric sense:</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span><span class="n">b2</span><span class="p">))</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span><span class="n">b2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Example A semi-axes (a,b) =&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">))</span>
+
+<span class="c1"># Generate ellipse points in principal coordinates, then map back</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<span class="n">u1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="n">u2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">b2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">u1</span><span class="p">,</span> <span class="n">u2</span><span class="p">])</span>              <span class="c1"># 2xN</span>
+<span class="n">X</span> <span class="o">=</span> <span class="p">(</span><span class="n">V</span> <span class="o">@</span> <span class="n">U</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">center</span>               <span class="c1"># Nx2 in original coordinates</span>
+
+<span class="c1"># Plot Example A</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Conic A (ellipse)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="n">x0</span><span class="p">],[</span><span class="n">y0</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">)</span>
+
+<span class="c1"># Plot principal axes directions</span>
+<span class="c1"># axes directions are columns of V, scale by semi-axes</span>
+<span class="n">axis1</span> <span class="o">=</span> <span class="n">center</span> <span class="o">+</span> <span class="n">V</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a2</span><span class="p">)</span>
+<span class="n">axis2</span> <span class="o">=</span> <span class="n">center</span> <span class="o">+</span> <span class="n">V</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">b2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis1</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis1</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;principal axis 1&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis2</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis2</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;principal axis 2&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s2">&quot;box&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Example A: general conic -&gt; ellipse (center + principal axes)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="c1"># -----------------------------</span>
+<span class="c1"># Example B: Parabola y^2 = 8x =&gt; p=2</span>
+<span class="c1"># -----------------------------</span>
+<span class="n">p_par</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="c1"># param t</span>
+<span class="n">tt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">400</span><span class="p">)</span>
+<span class="n">x_par</span> <span class="o">=</span> <span class="n">p_par</span><span class="o">*</span><span class="n">tt</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">y_par</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">p_par</span><span class="o">*</span><span class="n">tt</span>
+
+<span class="c1"># choose point at t0=1</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p_par</span><span class="o">*</span><span class="n">t0</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">p_par</span><span class="o">*</span><span class="n">t0</span><span class="p">])</span>  <span class="c1"># (2,4)</span>
+<span class="n">F_focus</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p_par</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>         <span class="c1"># (2,0)</span>
+<span class="c1"># directrix x=-p</span>
+<span class="n">directrix_x</span> <span class="o">=</span> <span class="o">-</span><span class="n">p_par</span>
+
+<span class="c1"># verify PF = distance to directrix</span>
+<span class="n">PF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">P</span> <span class="o">-</span> <span class="n">F_focus</span><span class="p">)</span>
+<span class="n">dist_directrix</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">directrix_x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Example B check e=1 property at P:&quot;</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PF =&quot;</span><span class="p">,</span> <span class="n">PF</span><span class="p">,</span> <span class="s2">&quot; distance to directrix =&quot;</span><span class="p">,</span> <span class="n">dist_directrix</span><span class="p">)</span>
+
+<span class="c1"># tangent line at t0: t0*y = x + p*t0^2</span>
+<span class="c1"># =&gt; y = (x + p*t0^2)/t0</span>
+<span class="c1"># here t0=1: y = x + 2</span>
+<span class="n">x_line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">y_tan</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_line</span> <span class="o">+</span> <span class="n">p_par</span><span class="o">*</span><span class="p">(</span><span class="n">t0</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="n">t0</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_par</span><span class="p">,</span> <span class="n">y_par</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;parabola y^2=8x&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="n">F_focus</span><span class="p">[</span><span class="mi">0</span><span class="p">]],[</span><span class="n">F_focus</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;focus (2,0)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">directrix_x</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;directrix x=-2&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">]],[</span><span class="n">P</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;P at t=1 (2,4)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_line</span><span class="p">,</span> <span class="n">y_tan</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;tangent at P: y=x+2&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s2">&quot;box&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Example B: parabola with focus/directrix/tangent&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="c1"># -----------------------------</span>
+<span class="c1"># Bonus: standard hyperbola x^2/a^2 - y^2/b^2 = 1</span>
+<span class="c1"># -----------------------------</span>
+<span class="n">a_h</span><span class="p">,</span> <span class="n">b_h</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="n">a_h</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">b_h</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">a_h</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">a_h</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+<span class="n">y2</span> <span class="o">=</span> <span class="n">b_h</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x2</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">a_h</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="c1"># asymptotes y = ±(b/a)x</span>
+<span class="n">x_as</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">y_as</span> <span class="o">=</span> <span class="p">(</span><span class="n">b_h</span><span class="o">/</span><span class="n">a_h</span><span class="p">)</span><span class="o">*</span><span class="n">x_as</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;hyperbola branch&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="o">-</span><span class="n">y2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_as</span><span class="p">,</span> <span class="n">y_as</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;asymptote&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_as</span><span class="p">,</span> <span class="o">-</span><span class="n">y_as</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+<span class="c1"># foci</span>
+<span class="n">c_h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a_h</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b_h</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="n">c_h</span><span class="p">,</span> <span class="o">-</span><span class="n">c_h</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;foci&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s2">&quot;box&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Bonus: hyperbola with asymptotes and foci&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre>
+</div></details>
+
+<hr />
+
+<p>如果你希望我再补一份“更冷门但可用于解题的公式清单”（比如：极线极点的坐标算法、圆锥曲线的弦中点公式、过定点弦族的参数化、二次曲线的仿射不变量、圆锥曲线与直线交点的判别式与韦达关系、以及一批竞赛常见结论），我也可以按“<strong>公式 → 适用场景 → 一行例题</strong>”的格式继续整理。
+需要。</p>
+
+<hr />
+
+<h2 id="6-自动计算结果与互动图示由脚本生成">6) 自动计算结果与互动图示（由脚本生成）</h2>
+
+<h3 id="61-算例-a一般二次曲线-标准椭圆数值提取">6.1 算例 A：一般二次曲线 → 标准椭圆（数值提取）</h3>
+
+<ul>
+<li>判别式：\(\Delta&#95;2 = -200\) → ellipse-type (Δ2 &lt; 0)</li>
+<li>中心：\((x&#95;0,y&#95;0)=(2.76,1.08)\)</li>
+<li>去交叉项旋转角：\(\theta \approx 26.565^\circ\)</li>
+<li>特征值：\(\lambda&#95;1,\lambda&#95;2 \approx (5,10)\)</li>
+<li>半轴：\(a\approx 3.2087,\ b\approx 2.2689\)，\(c=\sqrt{a^2-b^2}\approx 2.2689\)，离心率 \(e=c/a\approx 0.7071\)</li>
+<li>焦点（原坐标系）：\(F&#95;1\approx(3.775,-0.949)\)，\(F&#95;2\approx(1.745,3.109)\)</li>
+</ul>
+
+<div id="widget-example-a" class="widget"></div>
+
+<p><details class="fallback">
+  <summary>静态图（备份）</summary>
+  <p><img src="assets/example_a.png" alt="Example A ellipse plot" /></p>
+</details></p>
+
+<h3 id="62-算例-b抛物线焦点-准线性质与切线验证">6.2 算例 B：抛物线焦点-准线性质与切线验证</h3>
+
+<ul>
+<li>\(\,y^2=8x \Rightarrow p=2\)，焦点 \(F=(2,0)\)，准线 \(x=-2\)</li>
+<li>取参数点 \(t=1\)：\(P=(2,4)\)</li>
+<li>数值验证：\(PF\approx 4\)，点到准线距离 \(\approx 4\)</li>
+<li>切线：(y = x + 2)</li>
+</ul>
+
+<div id="widget-parabola" class="widget"></div>
+
+<p><details class="fallback">
+  <summary>静态图（备份）</summary>
+  <p><img src="assets/example_b.png" alt="Example B parabola plot" /></p>
+</details></p>
+
+<h3 id="63-bonus标准双曲线-渐近线-焦点">6.3 Bonus：标准双曲线 + 渐近线 + 焦点</h3>
+
+<ul>
+<li>\(\frac{x^2}{a^2}-\frac{y^2}{b^2}=1\)，取 \(a=3,\,b=2\)</li>
+<li>\(c=\sqrt{a^2+b^2}\approx 3.6056\)，离心率 \(e=c/a\approx 1.2019\)</li>
+<li>渐近线：\(y=\pm \frac{b}{a}x=\pm 0.6667x\)</li>
+</ul>
+
+<div id="widget-hyperbola" class="widget"></div>
+
+<p><details class="fallback">
+  <summary>静态图（备份）</summary>
+  <p><img src="assets/hyperbola.png" alt="Hyperbola plot" /></p>
+</details></p>
+
+<h3 id="64-director-circle导圆互动图">6.4 Director circle（导圆）互动图</h3>
+
+<div id="widget-director-circle" class="widget"></div>
+
+<h2 id="7-更冷门但可用于解题的公式清单公式-适用场景-一行例题">7) 更冷门但可用于解题的公式清单（公式 → 适用场景 → 一行例题）</h2>
+
+<table>
+<thead>
+<tr>
+  <th>公式</th>
+  <th>适用场景</th>
+  <th>一行例题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>极线/极点（齐次）：若二次曲线为 \(X^T A X=0\)，点 \(P\) 的极线：\(P^T A X=0\)。</td>
+  <td>求切线、判共线/共点（射影味但解析也能算）</td>
+  <td>已知 \(A\) 与 \(P\)，直接矩阵乘法得到直线系数。</td>
+</tr>
+<tr>
+  <td>极线（一般式快速写法）：对 \(Ax^2+Bxy+Cy^2+Dx+Ey+F=0\)，点 \(P(x&#95;1,y&#95;1)\) 的极线可由“代换规则”写出：\(x^2\!\to xx&#95;1,\ y^2\!\to yy&#95;1,\ xy\!\to \frac12(xy&#95;1+x&#95;1y),\ x\!\to \frac12(x+x&#95;1),\ y\!\to \frac12(y+y&#95;1)\)。</td>
+  <td>不想上齐次坐标时的手算捷径</td>
+  <td>把 \(x&#95;1,y&#95;1\) 代入即可得到极线。</td>
+</tr>
+<tr>
+  <td>弦中点公式（通用）：对一般二次曲线 \(S=0\)，若 \(M(x&#95;1,y&#95;1)\) 是某条弦的中点，则该弦满足 \(T=S&#95;1\)（\(T\) 为“二次项双线性化 + 一次项取平均”的表达）。</td>
+  <td>“给中点求弦方程/方向” 常见套路</td>
+  <td>圆 \(x^2+y^2=r^2\) 退化为 \(xx&#95;1+yy&#95;1=x&#95;1^2+y&#95;1^2\)。</td>
+</tr>
+<tr>
+  <td>直线与圆锥曲线交点判别：设直线代入得到二次方程 \(at^2+bt+c=0\)，判别式 \(b^2-4ac\) 决定交点个数；韦达 \(t&#95;1+t&#95;2=-b/a,\ t&#95;1t&#95;2=c/a\)。</td>
+  <td>“切线判定/弦长/中点” 的统一入口</td>
+  <td>用韦达直接得到弦中点参数 \(\frac{t&#95;1+t&#95;2}{2}\)。</td>
+</tr>
+<tr>
+  <td>仿射不变量（常用口径）：二次项矩阵 \(Q\) 的惯性指数（正/负/零特征值个数）在可逆线性变换下不变；\(\det(Q)=0\) 与否对应“抛物线型 vs 有中心”。</td>
+  <td>判断类型在更一般的线性变换下是否改变</td>
+  <td>\(Q\) 非退化且正定 \(\Rightarrow\) 椭圆型（经仿射可化为圆）。</td>
+</tr>
+<tr>
+  <td>过定点弦族参数化：固定点 \(P\)，取过 \(P\) 的任意方向直线 \(L(m)\)，与圆锥曲线交于 \(P,Q\)，用代入得到关于参数的二次式，另一根即为 \(Q(m)\)。</td>
+  <td>“弦族/二次曲线上的点随斜率变化”</td>
+  <td>竞赛常用：把“过定点”变成“一元二次另一根”。</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="8-极线极点polar-line-pole展开说明更偏可计算版本">8) 极线/极点（Polar line / Pole）展开说明（更偏“可计算”版本）</h2>
+
+<h3 id="81-为什么它好用把切线共线判定变成线代">8.1 为什么它好用：把“切线/共线判定”变成线代</h3>
+
+<p>极线/极点本质上是二次曲线的“对偶”结构：你给一个点 \(P\)，它会对应一条直线 \(\ell\)（极线）；反过来你给一条直线 \(\ell\)，也会对应一个点 \(P\)（极点）。在解析几何里它最常用的三个等价用法是：</p>
+
+<ol>
+<li><strong>切线是极线的特例</strong>：若点 \(P\) 在曲线上，则 \(P\) 的极线就是该点处切线。</li>
+<li><strong>互伴性（对称性）</strong>：\(P\) 在 \(Q\) 的极线上 \(\Leftrightarrow\) \(Q\) 在 \(P\) 的极线上（非常适合判共线/共点）。</li>
+<li><strong>“外点两切线”的弦联络</strong>：对外点 \(P\)，从 \(P\) 引曲线两条切线，切点连线（接触弦）就是 \(P\) 的极线。</li>
+</ol>
+
+<h3 id="82-齐次坐标的一行公式推荐记这个">8.2 齐次坐标的一行公式（推荐记这个）</h3>
+
+<p>把平面点写成齐次向量 \(X=(x,y,1)^T\)。一般二次曲线
+$$
+Ax^2+Bxy+Cy^2+Dx+Ey+F=0
+$$
+可以写成矩阵形式
+$$
+X^T A X = 0,\qquad
+A=\begin{pmatrix}
+A &amp; \frac{B}{2} &amp; \frac{D}{2} \\
+\frac{B}{2} &amp; C &amp; \frac{E}{2} \\
+\frac{D}{2} &amp; \frac{E}{2} &amp; F
+\end{pmatrix}.
+$$</p>
+
+<p>给定点 \(P=(x&#95;1,y&#95;1,1)^T\)，它的极线就是
+$$
+\ell:\ (A P)^T X = 0.
+$$
+写成通常的直线式就是 \(\ell&#95;1 x+\ell&#95;2 y+\ell&#95;3=0\)（其中 \((\ell&#95;1,\ell&#95;2,\ell&#95;3)^T=A P\)）。</p>
+
+<blockquote>
+  <p>直观理解：\(A\) 提供了一个“二次型内积”。极线就是把这个“内积”对 \(P\) 做一次线性化。</p>
+</blockquote>
+
+<h3 id="83-不想上齐次用代换规则直接写极线手算友好">8.3 不想上齐次？用“代换规则”直接写极线（手算友好）</h3>
+
+<p>对 \(S(x,y)=Ax^2+Bxy+Cy^2+Dx+Ey+F\)，点 \(P(x&#95;1,y&#95;1)\) 的极线可由下面替换得到（把 \(S\) 里的每一项“线性化”）：</p>
+
+<ul>
+<li>\(x^2\to xx&#95;1\)，\(y^2\to yy&#95;1\)</li>
+<li>\(xy\to \frac12(xy&#95;1+x&#95;1y)\)</li>
+<li>\(x\to \frac12(x+x&#95;1)\)，\(y\to \frac12(y+y&#95;1)\)</li>
+<li>常数 \(F\) 保持不变</li>
+</ul>
+
+<p>替换后得到的方程就是极线方程 \(\ell=0\)。</p>
+
+<h3 id="84-两个最经典的例子顺便记极线切线">8.4 两个最经典的例子（顺便记极线=切线）</h3>
+
+<p><strong>例 1：单位圆</strong> \(x^2+y^2=1\)。点 \(P(x&#95;1,y&#95;1)\) 的极线为
+$$
+xx&#95;1+yy&#95;1=1.
+$$
+若 \(P\) 在圆上（即 \(x&#95;1^2+y&#95;1^2=1\)），这条直线正是圆在 \(P\) 处的切线。</p>
+
+<p><strong>例 2：椭圆</strong> \(\frac{x^2}{a^2}+\frac{y^2}{b^2}=1\)。点 \(P(x&#95;1,y&#95;1)\) 的极线为
+$$
+\frac{xx&#95;1}{a^2}+\frac{yy&#95;1}{b^2}=1.
+$$
+同样，若 \(P\) 在椭圆上，这就是切线方程（你在解析几何题里经常见到的那条）。</p>
+
+<h3 id="85-一个常见技巧用极线快速处理外点两切线">8.5 一个常见技巧：用极线快速处理“外点两切线”</h3>
+
+<p>若 \(P\) 是外点，从 \(P\) 作二次曲线两条切线，切点为 \(T&#95;1,T&#95;2\)。那么：</p>
+
+<ul>
+<li><strong>接触弦</strong> \(T&#95;1T&#95;2\) 的方程就是 \(P\) 的极线；</li>
+<li>反过来，如果你先求出 \(P\) 的极线，再和曲线联立求交点，就能直接拿到 \(T&#95;1,T&#95;2\)。</li>
+</ul>
+
+    </main>
+    <script>
+
+(() => {
+  'use strict';
+
+  const NS = 'http://www.w3.org/2000/svg';
+
+  const EXAMPLE_A = {
+    a: 3.20873806971,
+    b: 2.26892044814,
+    center: { x: 2.76, y: 1.08 },
+    f1: { x: 3.77469207152, y: -0.949384143035 },
+    f2: { x: 1.74530792848, y: 3.10938414303 },
+  };
+
+  function el(tag, attrs = {}, parent = null) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === null || v === undefined) continue;
+      if (k === 'text') node.textContent = String(v);
+      else node.setAttribute(k, String(v));
+    }
+    if (parent) parent.appendChild(node);
+    return node;
+  }
+
+  function svg(tag, attrs = {}, parent = null) {
+    const node = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === null || v === undefined) continue;
+      node.setAttribute(k, String(v));
+    }
+    if (parent) parent.appendChild(node);
+    return node;
+  }
+
+  function fmt(x, digits = 6) {
+    if (!Number.isFinite(x)) return 'NaN';
+    const abs = Math.abs(x);
+    if (abs !== 0 && (abs < 1e-4 || abs >= 1e6)) return x.toExponential(4);
+    return x.toFixed(digits);
+  }
+
+  function dist(p, q) {
+    const dx = p.x - q.x;
+    const dy = p.y - q.y;
+    return Math.hypot(dx, dy);
+  }
+
+  function pathFromWorld(points) {
+    if (!points.length) return '';
+    let d = `M ${points[0].x} ${-points[0].y}`;
+    for (let i = 1; i < points.length; i++) d += ` L ${points[i].x} ${-points[i].y}`;
+    return d;
+  }
+
+  function worldBounds(points) {
+    let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
+    for (const p of points) {
+      xmin = Math.min(xmin, p.x);
+      xmax = Math.max(xmax, p.x);
+      ymin = Math.min(ymin, p.y);
+      ymax = Math.max(ymax, p.y);
+    }
+    return { xmin, xmax, ymin, ymax };
+  }
+
+  function setViewBox(svgNode, bounds, pad) {
+    const xmin = bounds.xmin - pad;
+    const xmax = bounds.xmax + pad;
+    const ymin = bounds.ymin - pad;
+    const ymax = bounds.ymax + pad;
+    const x = xmin;
+    const y = -ymax; // flip-y
+    const w = xmax - xmin;
+    const h = ymax - ymin;
+    svgNode.setAttribute('viewBox', `${x} ${y} ${w} ${h}`);
+  }
+
+  function lineFromPoints(line, p, q) {
+    line.setAttribute('x1', p.x);
+    line.setAttribute('y1', -p.y);
+    line.setAttribute('x2', q.x);
+    line.setAttribute('y2', -q.y);
+  }
+
+  function circleAt(circ, p) {
+    circ.setAttribute('cx', p.x);
+    circ.setAttribute('cy', -p.y);
+  }
+
+  function buildSliderRow(parent, opts) {
+    const row = el('div', { class: 'control-row' }, parent);
+    el('div', { class: 'control-label', text: opts.label }, row);
+    const input = el('input', {
+      type: 'range',
+      min: opts.min,
+      max: opts.max,
+      step: opts.step,
+      value: opts.value,
+    }, row);
+    const val = el('div', { class: 'control-value' }, row);
+    const updateVal = () => {
+      val.textContent = opts.format ? opts.format(Number(input.value)) : String(input.value);
+    };
+    input.addEventListener('input', () => {
+      updateVal();
+      opts.onInput?.(Number(input.value));
+    });
+    updateVal();
+    return input;
+  }
+
+  function mountExampleA() {
+    const container = document.getElementById('widget-example-a');
+    if (!container) return;
+    container.innerHTML = '';
+    container.classList.add('widget');
+
+    el('div', { class: 'widget-title', text: 'Example A 椭圆：验证 PF₁+PF₂ = 2a（滑块改变点 P）' }, container);
+    const controls = el('div', { class: 'widget-controls' }, container);
+    const svgRoot = svg('svg', { class: 'conic-svg', role: 'img' }, container);
+    const readout = el('div', { class: 'widget-readout' }, container);
+
+    const a = EXAMPLE_A.a;
+    const b = EXAMPLE_A.b;
+    const center = EXAMPLE_A.center;
+    const f1 = EXAMPLE_A.f1;
+    const f2 = EXAMPLE_A.f2;
+    const c = dist(center, f1);
+    const vMajor = { x: (f1.x - center.x) / c, y: (f1.y - center.y) / c };
+    const vMinor = { x: -vMajor.y, y: vMajor.x };
+
+    const pathCurve = svg('path', { class: 'curve' }, svgRoot);
+    const seg1 = svg('line', { class: 'seg' }, svgRoot);
+    const seg2 = svg('line', { class: 'seg' }, svgRoot);
+    const circF1 = svg('circle', { class: 'focus', r: 0.12 }, svgRoot);
+    const circF2 = svg('circle', { class: 'focus', r: 0.12 }, svgRoot);
+    const circP = svg('circle', { class: 'point', r: 0.14 }, svgRoot);
+
+    const ellipsePts = [];
+    const N = 480;
+    for (let i = 0; i <= N; i++) {
+      const t = (i / N) * 2 * Math.PI;
+      const u = a * Math.cos(t);
+      const v = b * Math.sin(t);
+      ellipsePts.push({
+        x: center.x + vMajor.x * u + vMinor.x * v,
+        y: center.y + vMajor.y * u + vMinor.y * v,
+      });
+    }
+    pathCurve.setAttribute('d', pathFromWorld(ellipsePts));
+    circleAt(circF1, f1);
+    circleAt(circF2, f2);
+
+    const bounds = worldBounds([...ellipsePts, f1, f2]);
+    setViewBox(svgRoot, bounds, 0.9);
+
+    const tSlider = buildSliderRow(controls, {
+      label: 't（角参数）',
+      min: 0,
+      max: (2 * Math.PI).toFixed(4),
+      step: 0.01,
+      value: (Math.PI / 3).toFixed(4),
+      format: (t) => `${fmt(t, 3)} rad  (≈ ${fmt(t * 180 / Math.PI, 1)}°)`,
+      onInput: update,
+    });
+
+    function update() {
+      const t = Number(tSlider.value);
+      const u = a * Math.cos(t);
+      const v = b * Math.sin(t);
+      const P = {
+        x: center.x + vMajor.x * u + vMinor.x * v,
+        y: center.y + vMajor.y * u + vMinor.y * v,
+      };
+
+      circleAt(circP, P);
+      lineFromPoints(seg1, P, f1);
+      lineFromPoints(seg2, P, f2);
+
+      const d1 = dist(P, f1);
+      const d2 = dist(P, f2);
+      const sum = d1 + d2;
+      const target = 2 * a;
+      const err = sum - target;
+      readout.innerHTML = `
+        <div><span class="k">PF₁</span>=${fmt(d1)}, <span class="k">PF₂</span>=${fmt(d2)}, <span class="k">PF₁+PF₂</span>=${fmt(sum)}；常数 <span class="k">2a</span>=${fmt(target)}；误差=${fmt(err, 8)}</div>
+      `;
+    }
+
+    update();
+  }
+
+  function mountParabola() {
+    const container = document.getElementById('widget-parabola');
+    if (!container) return;
+    container.innerHTML = '';
+    container.classList.add('widget');
+
+    el('div', { class: 'widget-title', text: '抛物线：验证 PF = 到准线距离（e=1）' }, container);
+    const controls = el('div', { class: 'widget-controls' }, container);
+    const svgRoot = svg('svg', { class: 'conic-svg', role: 'img' }, container);
+    const readout = el('div', { class: 'widget-readout' }, container);
+
+    const pathCurve = svg('path', { class: 'curve' }, svgRoot);
+    const directrix = svg('line', { class: 'directrix' }, svgRoot);
+    const segFocus = svg('line', { class: 'seg' }, svgRoot);
+    const segDir = svg('line', { class: 'seg2' }, svgRoot);
+    const circF = svg('circle', { class: 'focus', r: 0.12 }, svgRoot);
+    const circP = svg('circle', { class: 'point', r: 0.14 }, svgRoot);
+
+    const tMax = 3.5;
+    const N = 520;
+
+    let p = 2.0;
+    let t = 1.0;
+
+    const pSlider = buildSliderRow(controls, {
+      label: 'p',
+      min: 0.5,
+      max: 5.0,
+      step: 0.05,
+      value: p,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => { p = v; redraw(); },
+    });
+
+    const tSlider = buildSliderRow(controls, {
+      label: 't（参数点）',
+      min: -tMax,
+      max: tMax,
+      step: 0.01,
+      value: t,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => { t = v; redraw(); },
+    });
+
+    function redraw() {
+      p = Number(pSlider.value);
+      t = Number(tSlider.value);
+
+      const focus = { x: p, y: 0 };
+      const directrixX = -p;
+      const P = { x: p * t * t, y: 2 * p * t };
+      const Q = { x: directrixX, y: P.y }; // foot to directrix (horizontal segment)
+
+      // curve
+      const pts = [];
+      for (let i = 0; i <= N; i++) {
+        const tt = -tMax + (2 * tMax * i) / N;
+        pts.push({ x: p * tt * tt, y: 2 * p * tt });
+      }
+      pathCurve.setAttribute('d', pathFromWorld(pts));
+
+      // features
+      circleAt(circF, focus);
+      circleAt(circP, P);
+      lineFromPoints(segFocus, P, focus);
+      lineFromPoints(segDir, P, Q);
+
+      // directrix line segment
+      const ySpan = 2 * p * tMax;
+      directrix.setAttribute('x1', directrixX);
+      directrix.setAttribute('y1', -(-ySpan));
+      directrix.setAttribute('x2', directrixX);
+      directrix.setAttribute('y2', -(ySpan));
+
+      // viewBox
+      const bounds = worldBounds([...pts, focus, P, Q, { x: directrixX, y: -ySpan }, { x: directrixX, y: ySpan }]);
+      setViewBox(svgRoot, bounds, 0.9);
+
+      // invariants
+      const dFocus = dist(P, focus);
+      const dDir = Math.abs(P.x - directrixX);
+      const err = dFocus - dDir;
+      readout.innerHTML = `
+        <div><span class="k">P</span>=(${fmt(P.x, 4)}, ${fmt(P.y, 4)})，<span class="k">F</span>=(${fmt(focus.x, 3)},0)，准线 <span class="k">x</span>=${fmt(directrixX, 3)}</div>
+        <div><span class="k">PF</span>=${fmt(dFocus)}, <span class="k">dist(P, directrix)</span>=${fmt(dDir)}；误差=${fmt(err, 8)}</div>
+      `;
+    }
+
+    redraw();
+  }
+
+  function mountHyperbola() {
+    const container = document.getElementById('widget-hyperbola');
+    if (!container) return;
+    container.innerHTML = '';
+    container.classList.add('widget');
+
+    el('div', { class: 'widget-title', text: '双曲线：验证 |PF₁−PF₂| = 2a（滑块改变 a,b 与点 P）' }, container);
+    const controls = el('div', { class: 'widget-controls' }, container);
+    const svgRoot = svg('svg', { class: 'conic-svg', role: 'img' }, container);
+    const readout = el('div', { class: 'widget-readout' }, container);
+
+    const pathR = svg('path', { class: 'curve' }, svgRoot);
+    const pathL = svg('path', { class: 'curve' }, svgRoot);
+    const as1 = svg('line', { class: 'asym' }, svgRoot);
+    const as2 = svg('line', { class: 'asym' }, svgRoot);
+    const seg1 = svg('line', { class: 'seg' }, svgRoot);
+    const seg2 = svg('line', { class: 'seg' }, svgRoot);
+    const circF1 = svg('circle', { class: 'focus', r: 0.12 }, svgRoot);
+    const circF2 = svg('circle', { class: 'focus', r: 0.12 }, svgRoot);
+    const circP = svg('circle', { class: 'point', r: 0.14 }, svgRoot);
+
+    const Umax = 2.0;
+    const N = 560;
+
+    let a = 3.0;
+    let b = 2.0;
+    let u = 1.0;
+
+    const aSlider = buildSliderRow(controls, {
+      label: 'a',
+      min: 0.8,
+      max: 6.0,
+      step: 0.05,
+      value: a,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => { a = v; redraw(); },
+    });
+    const bSlider = buildSliderRow(controls, {
+      label: 'b',
+      min: 0.5,
+      max: 5.0,
+      step: 0.05,
+      value: b,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => { b = v; redraw(); },
+    });
+    const uSlider = buildSliderRow(controls, {
+      label: 'u（参数）',
+      min: -Umax,
+      max: Umax,
+      step: 0.01,
+      value: u,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => { u = v; redraw(); },
+    });
+
+    function redraw() {
+      a = Number(aSlider.value);
+      b = Number(bSlider.value);
+      u = Number(uSlider.value);
+
+      const c = Math.hypot(a, b);
+      const f1 = { x: c, y: 0 };
+      const f2 = { x: -c, y: 0 };
+
+      const P = { x: a * Math.cosh(u), y: b * Math.sinh(u) }; // right branch
+
+      // curves
+      const ptsR = [];
+      const ptsL = [];
+      for (let i = 0; i <= N; i++) {
+        const uu = -Umax + (2 * Umax * i) / N;
+        const x = a * Math.cosh(uu);
+        const y = b * Math.sinh(uu);
+        ptsR.push({ x, y });
+        ptsL.push({ x: -x, y });
+      }
+      pathR.setAttribute('d', pathFromWorld(ptsR));
+      pathL.setAttribute('d', pathFromWorld(ptsL));
+
+      // asymptotes
+      const slope = b / a;
+      const xSpan = a * Math.cosh(Umax);
+      const A1 = { x: -xSpan, y: -slope * xSpan };
+      const A2 = { x: xSpan, y: slope * xSpan };
+      const B1 = { x: -xSpan, y: slope * xSpan };
+      const B2 = { x: xSpan, y: -slope * xSpan };
+      lineFromPoints(as1, A1, A2);
+      lineFromPoints(as2, B1, B2);
+
+      // points + segments
+      circleAt(circF1, f1);
+      circleAt(circF2, f2);
+      circleAt(circP, P);
+      lineFromPoints(seg1, P, f1);
+      lineFromPoints(seg2, P, f2);
+
+      const bounds = worldBounds([...ptsR, ...ptsL, f1, f2, P, A1, A2, B1, B2]);
+      setViewBox(svgRoot, bounds, 1.2);
+
+      const d1 = dist(P, f1);
+      const d2 = dist(P, f2);
+      const diff = Math.abs(d2 - d1);
+      const target = 2 * a;
+      const err = diff - target;
+      readout.innerHTML = `
+        <div><span class="k">PF₁</span>=${fmt(d1)}, <span class="k">PF₂</span>=${fmt(d2)}, <span class="k">|PF₁−PF₂|</span>=${fmt(diff)}；常数 <span class="k">2a</span>=${fmt(target)}；误差=${fmt(err, 8)}</div>
+      `;
+    }
+
+    redraw();
+  }
+
+  function mountDirectorCircle() {
+    const container = document.getElementById('widget-director-circle');
+    if (!container) return;
+    container.innerHTML = '';
+    container.classList.add('widget');
+
+    el('div', { class: 'widget-title', text: '导圆：从圆上点引曲线切线互相垂直（滑块调参/选点）' }, container);
+    const controls = el('div', { class: 'widget-controls' }, container);
+    const svgRoot = svg('svg', { class: 'conic-svg', role: 'img' }, container);
+    const readout = el('div', { class: 'widget-readout' }, container);
+
+    const typeRow = el('div', { class: 'control-row' }, controls);
+    el('div', { class: 'control-label', text: '类型' }, typeRow);
+    const typeSel = el('select', { class: 'control-select' }, typeRow);
+    el('option', { value: 'ellipse', text: '椭圆' }, typeSel);
+    el('option', { value: 'hyperbola', text: '双曲线' }, typeSel);
+    const typeVal = el('div', { class: 'control-value', text: '' }, typeRow);
+
+    let a = 4.0;
+    let b = 2.5;
+    let phi = 0.8;
+
+    const aSlider = buildSliderRow(controls, {
+      label: 'a',
+      min: 1.2,
+      max: 7.0,
+      step: 0.05,
+      value: a,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => { a = v; redraw(); },
+    });
+    const bSlider = buildSliderRow(controls, {
+      label: 'b',
+      min: 0.6,
+      max: 6.0,
+      step: 0.05,
+      value: b,
+      format: (v) => fmt(v, 2),
+      onInput: (v) => { b = v; redraw(); },
+    });
+    const phiSlider = buildSliderRow(controls, {
+      label: '选点角 φ',
+      min: 0,
+      max: (2 * Math.PI).toFixed(4),
+      step: 0.01,
+      value: phi,
+      format: (t) => `${fmt(t, 3)} rad  (≈ ${fmt(t * 180 / Math.PI, 1)}°)`,
+      onInput: (v) => { phi = v; redraw(); },
+    });
+
+    const curve1 = svg('path', { class: 'curve' }, svgRoot);
+    const curve2 = svg('path', { class: 'curve' }, svgRoot);
+    const circleDir = svg('path', { class: 'dircircle' }, svgRoot);
+    const tang1 = svg('line', { class: 'tangent' }, svgRoot);
+    const tang2 = svg('line', { class: 'tangent' }, svgRoot);
+    const pointS = svg('circle', { class: 'point', r: 0.14 }, svgRoot);
+    const t1 = svg('circle', { class: 'focus', r: 0.11 }, svgRoot);
+    const t2 = svg('circle', { class: 'focus', r: 0.11 }, svgRoot);
+
+    function circlePath(R) {
+      // SVG arc circle centered at origin in world coords, then flip y.
+      const y = 0;
+      const d = [
+        `M ${R} ${-y}`,
+        `A ${R} ${R} 0 1 0 ${-R} ${-y}`,
+        `A ${R} ${R} 0 1 0 ${R} ${-y}`,
+      ].join(' ');
+      return d;
+    }
+
+    function conicEllipsePts(a, b) {
+      const pts = [];
+      const N = 520;
+      for (let i = 0; i <= N; i++) {
+        const t = (i / N) * 2 * Math.PI;
+        pts.push({ x: a * Math.cos(t), y: b * Math.sin(t) });
+      }
+      return pts;
+    }
+
+    function conicHyperbolaPts(a, b) {
+      const ptsR = [];
+      const ptsL = [];
+      const U = 1.9;
+      const N = 520;
+      for (let i = 0; i <= N; i++) {
+        const u = -U + (2 * U * i) / N;
+        const x = a * Math.cosh(u);
+        const y = b * Math.sinh(u);
+        ptsR.push({ x, y });
+        ptsL.push({ x: -x, y });
+      }
+      return { ptsR, ptsL };
+    }
+
+    function lineSegmentForAxByC(A, B, C, bounds) {
+      // Solve A x + B y + C = 0 within bounding box (world coords).
+      const xmin = bounds.xmin, xmax = bounds.xmax, ymin = bounds.ymin, ymax = bounds.ymax;
+      const pts = [];
+      // Intersections with x = xmin/xmax
+      if (Math.abs(B) > 1e-12) {
+        const y1 = (-C - A * xmin) / B;
+        const y2 = (-C - A * xmax) / B;
+        if (y1 >= ymin && y1 <= ymax) pts.push({ x: xmin, y: y1 });
+        if (y2 >= ymin && y2 <= ymax) pts.push({ x: xmax, y: y2 });
+      }
+      // Intersections with y = ymin/ymax
+      if (Math.abs(A) > 1e-12) {
+        const x1 = (-C - B * ymin) / A;
+        const x2 = (-C - B * ymax) / A;
+        if (x1 >= xmin && x1 <= xmax) pts.push({ x: x1, y: ymin });
+        if (x2 >= xmin && x2 <= xmax) pts.push({ x: x2, y: ymax });
+      }
+      if (pts.length < 2) return null;
+      // pick farthest pair
+      let best = [pts[0], pts[1]];
+      let bestD = -1;
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const d = dist(pts[i], pts[j]);
+          if (d > bestD) {
+            bestD = d;
+            best = [pts[i], pts[j]];
+          }
+        }
+      }
+      return best;
+    }
+
+    function intersectCircleLineUnit(n) {
+      // Unit circle x^2+y^2=1 with line n·x = 1 (n=(nx,ny)).
+      const nx = n.x, ny = n.y;
+      const nn = Math.hypot(nx, ny);
+      if (!(nn > 1 + 1e-12)) return null;
+      const x0 = nx / (nn * nn);
+      const y0 = ny / (nn * nn);
+      const h = Math.sqrt(1 - (x0 * x0 + y0 * y0));
+      const dx = -ny / nn;
+      const dy = nx / nn;
+      return [
+        { x: x0 + h * dx, y: y0 + h * dy },
+        { x: x0 - h * dx, y: y0 - h * dy },
+      ];
+    }
+
+    function tangentPointsEllipseFromExternalPoint(P, a, b) {
+      // Scale to unit circle: X=x/a, Y=y/b.
+      const n = { x: P.x / a, y: P.y / b };
+      const sols = intersectCircleLineUnit(n);
+      if (!sols) return null;
+      return sols.map((T) => ({ x: a * T.x, y: b * T.y }));
+    }
+
+    function tangentPointsHyperbolaFromExternalPoint(P, a, b) {
+      // Scale: X=x/a, Y=y/b. Hyperbola: X^2 - Y^2 = 1.
+      const X0 = P.x / a;
+      const Y0 = P.y / b;
+
+      if (Math.abs(Y0) < 1e-10) {
+        // X0*X = 1
+        if (Math.abs(X0) < 1e-12) return null;
+        const X = 1 / X0;
+        const Yabs = Math.sqrt(Math.max(X * X - 1, 0));
+        return [
+          { x: a * X, y: b * Yabs },
+          { x: a * X, y: -b * Yabs },
+        ];
+      }
+
+      const A = Y0 * Y0 - X0 * X0;
+      const B = 2 * X0;
+      const C = -(1 + Y0 * Y0);
+      const disc = B * B - 4 * A * C;
+      if (disc < 0) return null;
+      const s = Math.sqrt(disc);
+      if (Math.abs(A) < 1e-12) {
+        // Linear
+        const X = -C / B;
+        const Y = (X0 * X - 1) / Y0;
+        return [{ x: a * X, y: b * Y }];
+      }
+      const X1 = (-B + s) / (2 * A);
+      const X2 = (-B - s) / (2 * A);
+      const Y1 = (X0 * X1 - 1) / Y0;
+      const Y2 = (X0 * X2 - 1) / Y0;
+      return [
+        { x: a * X1, y: b * Y1 },
+        { x: a * X2, y: b * Y2 },
+      ];
+    }
+
+    function redraw() {
+      a = Number(aSlider.value);
+      b = Number(bSlider.value);
+      phi = Number(phiSlider.value);
+      const type = typeSel.value;
+      typeVal.textContent = '';
+
+      // director circle radius
+      let R = NaN;
+      if (type === 'ellipse') R = Math.sqrt(a * a + b * b);
+      else R = a > b ? Math.sqrt(a * a - b * b) : NaN;
+
+      const S = Number.isFinite(R)
+        ? { x: R * Math.cos(phi), y: R * Math.sin(phi) }
+        : { x: 0, y: 0 };
+      circleAt(pointS, S);
+
+      // conic + director circle
+      const allPts = [];
+      if (type === 'ellipse') {
+        const pts = conicEllipsePts(a, b);
+        curve1.setAttribute('d', pathFromWorld(pts));
+        curve2.setAttribute('d', '');
+        allPts.push(...pts);
+      } else {
+        const pts = conicHyperbolaPts(a, b);
+        curve1.setAttribute('d', pathFromWorld(pts.ptsR));
+        curve2.setAttribute('d', pathFromWorld(pts.ptsL));
+        allPts.push(...pts.ptsR, ...pts.ptsL);
+      }
+
+      if (Number.isFinite(R) && R > 0) {
+        circleDir.setAttribute('d', circlePath(R));
+      } else {
+        circleDir.setAttribute('d', '');
+      }
+
+      // Tangents from S (only when director circle is real)
+      let tangentsOk = false;
+      let dot = NaN;
+      let T1 = null, T2 = null;
+      if (Number.isFinite(R) && R > 0) {
+        const tangPts =
+          type === 'ellipse'
+            ? tangentPointsEllipseFromExternalPoint(S, a, b)
+            : tangentPointsHyperbolaFromExternalPoint(S, a, b);
+
+        if (tangPts && tangPts.length >= 2) {
+          T1 = tangPts[0];
+          T2 = tangPts[1];
+          circleAt(t1, T1);
+          circleAt(t2, T2);
+
+          // Line coefficients in world coords:
+          // ellipse: (x1/a^2)x + (y1/b^2)y = 1
+          // hyperbola: (x1/a^2)x - (y1/b^2)y = 1
+          const A1 = T1.x / (a * a);
+          const B1 = (type === 'ellipse' ? T1.y : -T1.y) / (b * b);
+          const A2 = T2.x / (a * a);
+          const B2 = (type === 'ellipse' ? T2.y : -T2.y) / (b * b);
+
+          const bounds = worldBounds([...allPts, S]);
+          const segA = lineSegmentForAxByC(A1, B1, -1, {
+            xmin: bounds.xmin - 1,
+            xmax: bounds.xmax + 1,
+            ymin: bounds.ymin - 1,
+            ymax: bounds.ymax + 1,
+          });
+          const segB = lineSegmentForAxByC(A2, B2, -1, {
+            xmin: bounds.xmin - 1,
+            xmax: bounds.xmax + 1,
+            ymin: bounds.ymin - 1,
+            ymax: bounds.ymax + 1,
+          });
+          if (segA && segB) {
+            lineFromPoints(tang1, segA[0], segA[1]);
+            lineFromPoints(tang2, segB[0], segB[1]);
+            const d1 = { x: segA[1].x - segA[0].x, y: segA[1].y - segA[0].y };
+            const d2 = { x: segB[1].x - segB[0].x, y: segB[1].y - segB[0].y };
+            dot = (d1.x * d2.x + d1.y * d2.y) / (Math.hypot(d1.x, d1.y) * Math.hypot(d2.x, d2.y));
+            tangentsOk = true;
+          }
+        }
+      }
+
+      if (!tangentsOk) {
+        tang1.setAttribute('x1', 0); tang1.setAttribute('y1', 0); tang1.setAttribute('x2', 0); tang1.setAttribute('y2', 0);
+        tang2.setAttribute('x1', 0); tang2.setAttribute('y1', 0); tang2.setAttribute('x2', 0); tang2.setAttribute('y2', 0);
+        t1.setAttribute('cx', 0); t1.setAttribute('cy', 0);
+        t2.setAttribute('cx', 0); t2.setAttribute('cy', 0);
+      }
+
+      const bounds = worldBounds([...allPts, ...(Number.isFinite(R) ? [{x:R,y:0},{x:-R,y:0},{x:0,y:R},{x:0,y:-R}] : []), S]);
+      setViewBox(svgRoot, bounds, 1.1);
+
+      if (type === 'hyperbola' && !(a > b)) {
+        readout.innerHTML = `<div>双曲线导圆：需要 <span class="k">a &gt; b</span> 才是实圆；当前 a=${fmt(a,2)}, b=${fmt(b,2)}。</div>`;
+      } else {
+        const circleEq =
+          type === 'ellipse'
+            ? `x²+y² = a²+b² = ${fmt(a*a + b*b, 3)}`
+            : `x²+y² = a²−b² = ${fmt(a*a - b*b, 3)}`;
+        const perp = tangentsOk ? `两条切线方向余弦点积 ≈ ${fmt(dot, 6)}（≈0 表示垂直）` : '（当前选点无法作两条实切线）';
+        readout.innerHTML = `
+          <div>导圆方程：<span class="k">${circleEq}</span>，半径 R=${Number.isFinite(R) ? fmt(R, 4) : '—'}。</div>
+          <div>${perp}</div>
+        `;
+      }
+    }
+
+    typeSel.addEventListener('change', redraw);
+    redraw();
+  }
+
+  function init() {
+    mountExampleA();
+    mountParabola();
+    mountHyperbola();
+    mountDirectorCircle();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+    </script>
+  </body>
+</html>

@@ -491,6 +491,10 @@ def _build_generated_section(a: ExampleAResult, b: ExampleBResult, h: HyperbolaR
 ### 6.4 Director circle（导圆）互动图
 
 <div id="widget-director-circle" class="widget"></div>
+
+### 6.5 立体圆锥截线：一个互动图统一椭圆/抛物线/双曲线
+
+<div id="widget-cone-unified" class="widget"></div>
 """
 
 
@@ -1287,11 +1291,534 @@ def _interactive_js(exa: ExampleAResult) -> str:
     redraw();
   }}
 
+  function mountConeUnified() {{
+    const container = document.getElementById('widget-cone-unified');
+    if (!container) return;
+    container.innerHTML = '';
+    container.classList.add('widget');
+
+    el('div', {{
+      class: 'widget-title',
+      text: '立体圆锥截线：统一椭圆/抛物线/双曲线（验证 PF₁±PF₂ 常数 + 焦点-准线关系）',
+    }}, container);
+
+    const controls = el('div', {{ class: 'widget-controls' }}, container);
+    const views = el('div', {{ class: 'widget-views' }}, container);
+    const svg3 = svg('svg', {{ class: 'conic-svg', role: 'img', 'aria-label': '3D cone and cutting plane' }}, views);
+    const svg2 = svg('svg', {{ class: 'conic-svg', role: 'img', 'aria-label': 'Conic in plane coordinates (u,v)' }}, views);
+    const readout = el('div', {{ class: 'widget-readout' }}, container);
+
+    function makeSlider(parent, labelText, opts) {{
+      const row = el('div', {{ class: 'control-row' }}, parent);
+      const label = el('div', {{ class: 'control-label', text: labelText }}, row);
+      const input = el('input', {{
+        type: 'range',
+        min: opts.min,
+        max: opts.max,
+        step: opts.step,
+        value: opts.value,
+      }}, row);
+      const val = el('div', {{ class: 'control-value' }}, row);
+      let format = opts.format ?? ((v) => String(v));
+      const updateVal = () => {{
+        val.textContent = format(Number(input.value));
+      }};
+      input.addEventListener('input', () => {{
+        updateVal();
+        opts.onInput?.(Number(input.value));
+      }});
+      updateVal();
+      return {{
+        input,
+        label,
+        val,
+        get: () => Number(input.value),
+        setLabel: (t) => {{ label.textContent = t; }},
+        setRange: (min, max, step) => {{
+          input.min = String(min);
+          input.max = String(max);
+          input.step = String(step);
+        }},
+        setValue: (v) => {{
+          input.value = String(v);
+          updateVal();
+        }},
+        setFormat: (fn) => {{
+          format = fn;
+          updateVal();
+        }},
+      }};
+    }}
+
+    const betaSlider = makeSlider(controls, '锥母线与轴夹角 β', {{
+      min: 15,
+      max: 70,
+      step: 1,
+      value: 40,
+      format: (v) => `${{fmt(v, 1)}}°`,
+      onInput: () => redraw(),
+    }});
+    const thetaSlider = makeSlider(controls, '切平面倾角 θ（xz 截面）', {{
+      min: 0,
+      max: 85,
+      step: 0.5,
+      value: 25,
+      format: (v) => `${{fmt(v, 1)}}°`,
+      onInput: () => redraw(),
+    }});
+    const hSlider = makeSlider(controls, '截距 h（z 轴交点）', {{
+      min: 0.6,
+      max: 6.0,
+      step: 0.05,
+      value: 2.5,
+      format: (v) => fmt(v, 2),
+      onInput: () => redraw(),
+    }});
+
+    const branchRow = el('div', {{ class: 'control-row' }}, controls);
+    const branchLabel = el('div', {{ class: 'control-label', text: '双曲线分支' }}, branchRow);
+    const branchSel = el('select', {{ class: 'control-select' }}, branchRow);
+    el('option', {{ value: 'right', text: '右支 (u 增)' }}, branchSel);
+    el('option', {{ value: 'left', text: '左支 (u 减)' }}, branchSel);
+    const branchVal = el('div', {{ class: 'control-value', text: '' }}, branchRow);
+    branchSel.addEventListener('change', () => redraw());
+
+    const paramSlider = makeSlider(controls, '参数', {{
+      min: 0,
+      max: (2 * Math.PI).toFixed(4),
+      step: 0.01,
+      value: 1.0,
+      format: (v) => fmt(v, 3),
+      onInput: () => redraw(),
+    }});
+
+    // --- 2D (plane coords) SVG elements ---
+    const path2Main = svg('path', {{ class: 'curve' }}, svg2);
+    const path2Alt = svg('path', {{ class: 'curve-alt' }}, svg2);
+    const dir2a = svg('line', {{ class: 'directrix' }}, svg2);
+    const dir2b = svg('line', {{ class: 'directrix' }}, svg2);
+    const seg2f1 = svg('line', {{ class: 'seg' }}, svg2);
+    const seg2f2 = svg('line', {{ class: 'seg2' }}, svg2);
+    const seg2dir = svg('line', {{ class: 'seg3' }}, svg2);
+    const c2f1 = svg('circle', {{ class: 'focus', r: 0.12 }}, svg2);
+    const c2f2 = svg('circle', {{ class: 'focus', r: 0.12 }}, svg2);
+    const c2p = svg('circle', {{ class: 'point', r: 0.14 }}, svg2);
+
+    // --- 3D (projected) SVG elements ---
+    const coneLines = [];
+    const coneCircleTop = svg('path', {{ class: 'cone' }}, svg3);
+    const coneCircleBot = svg('path', {{ class: 'cone' }}, svg3);
+    const planePoly = svg('polygon', {{ class: 'plane' }}, svg3);
+    const path3Main = svg('path', {{ class: 'curve' }}, svg3);
+    const path3Alt = svg('path', {{ class: 'curve-alt' }}, svg3);
+    const dir3a = svg('line', {{ class: 'directrix' }}, svg3);
+    const dir3b = svg('line', {{ class: 'directrix' }}, svg3);
+    const seg3f1 = svg('line', {{ class: 'seg' }}, svg3);
+    const seg3f2 = svg('line', {{ class: 'seg2' }}, svg3);
+    const seg3dir = svg('line', {{ class: 'seg3' }}, svg3);
+    const c3f1 = svg('circle', {{ class: 'focus', r: 0.12 }}, svg3);
+    const c3f2 = svg('circle', {{ class: 'focus', r: 0.12 }}, svg3);
+    const c3p = svg('circle', {{ class: 'point', r: 0.14 }}, svg3);
+
+    const GEN = 10;
+    for (let i = 0; i < GEN * 2; i++) coneLines.push(svg('line', {{ class: 'cone' }}, svg3));
+
+    const yaw = 0.78;  // camera yaw
+    const pitch = 0.48; // camera pitch
+    const cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const cx = Math.cos(pitch), sx = Math.sin(pitch);
+    const persp = 0.09;
+
+    function project3D(p) {{
+      // Rotate around Y, then X; mild perspective.
+      const x1 = p.x * cy + p.z * sy;
+      const z1 = -p.x * sy + p.z * cy;
+      const y1 = p.y;
+      const y2 = y1 * cx - z1 * sx;
+      const z2 = y1 * sx + z1 * cx;
+      const x2 = x1;
+      const sc = 1 / (1 + persp * z2);
+      return {{ x: x2 * sc, y: y2 * sc }};
+    }}
+
+    function polyPoints(pts) {{
+      return pts.map((p) => `${{p.x}},${{-p.y}}`).join(' ');
+    }}
+
+    function pathFrom2D(pts) {{
+      return pathFromWorld(pts);
+    }}
+
+    function redraw() {{
+      const betaDeg = betaSlider.get();
+      const thetaDeg = thetaSlider.get();
+      const h = hSlider.get();
+
+      const beta = (betaDeg * Math.PI) / 180;
+      const theta = (thetaDeg * Math.PI) / 180;
+      const m = Math.tan(beta);        // cone: r = m z
+      const s = Math.tan(theta);       // plane: z = s x + h
+
+      const thetaParab = 90 - betaDeg; // parabola when θ ≈ 90°−β
+
+      const denom = 1 + s * s;
+      const sqrtDen = Math.sqrt(denom);
+      const k = m * s;
+      const delta = 1 - k * k;
+      const eps = 2e-3;
+
+      let type = 'ellipse';
+      if (Math.abs(delta) < eps) type = 'parabola';
+      else if (delta > 0) type = 'ellipse';
+      else type = 'hyperbola';
+
+      branchRow.style.display = type === 'hyperbola' ? 'grid' : 'none';
+      branchVal.textContent = type === 'hyperbola' ? (branchSel.value === 'left' ? 'left' : 'right') : '';
+
+      // Configure param slider based on type.
+      if (type === 'ellipse') {{
+        paramSlider.setLabel('t（椭圆参数角）');
+        paramSlider.setRange(0, (2 * Math.PI).toFixed(4), 0.01);
+        paramSlider.setFormat((v) => `${{fmt(v, 3)}} rad`);
+      }} else if (type === 'hyperbola') {{
+        paramSlider.setLabel('u（cosh/sinh 参数）');
+        paramSlider.setRange(-1.6, 1.6, 0.01);
+        paramSlider.setFormat((v) => fmt(v, 2));
+      }} else {{
+        paramSlider.setLabel('t（抛物线参数）');
+        paramSlider.setRange(-3.2, 3.2, 0.01);
+        paramSlider.setFormat((v) => fmt(v, 2));
+      }}
+
+      const t = paramSlider.get();
+
+      // Basis in cutting plane: origin O=(0,0,h), e_u=(1,0,s)/sqrt(1+s^2), e_v=(0,1,0)
+      function to3D(u, v) {{
+        const x = u / sqrtDen;
+        const y = v;
+        const z = h + (s * u) / sqrtDen;
+        return {{ x, y, z }};
+      }}
+
+      // Conic in (u,v): A u^2 + v^2 + D u + F = 0
+      // where A=(1-k^2)/(1+s^2), D=-2 m^2 s h / sqrt(1+s^2), F=-m^2 h^2
+      let u0 = 0;
+      let a = 0, b = 0, c = 0, ecc = 1;
+      let f1 = {{ x: 0, y: 0 }}, f2 = {{ x: 0, y: 0 }};
+      let dirU1 = NaN, dirU2 = NaN;
+      let P = {{ x: 0, y: 0 }};
+      let Qdir = {{ x: 0, y: 0 }};
+
+      let ptsMain = [];
+      let ptsAlt = [];
+
+      if (type === 'parabola') {{
+        const D = (-2 * m * m * s * h) / sqrtDen;
+        const kLin = -D; // v^2 = kLin * u + m^2 h^2
+        const p = kLin / 4;
+        const uV = -((m * m * h * h) / kLin);
+        const uF = uV + p;
+        const uDir = uV - p;
+
+        ecc = 1;
+        f1 = {{ x: uF, y: 0 }};
+        f2 = {{ x: uF, y: 0 }};
+        dirU1 = uDir;
+        dirU2 = NaN;
+
+        P = {{ x: uV + p * t * t, y: 2 * p * t }};
+        Qdir = {{ x: uDir, y: P.y }};
+
+        const TT = 3.2;
+        const N = 520;
+        for (let i = 0; i <= N; i++) {{
+          const tt = -TT + (2 * TT * i) / N;
+          ptsMain.push({{ x: uV + p * tt * tt, y: 2 * p * tt }});
+        }}
+        ptsAlt = [];
+
+        // 2D draw
+        path2Main.setAttribute('d', pathFrom2D(ptsMain));
+        path2Alt.setAttribute('d', '');
+        circleAt(c2f1, f1);
+        circleAt(c2f2, f1);
+        circleAt(c2p, P);
+        lineFromPoints(seg2f1, P, f1);
+        lineFromPoints(seg2f2, P, Qdir);
+        seg2dir.setAttribute('x1', 0); seg2dir.setAttribute('y1', 0); seg2dir.setAttribute('x2', 0); seg2dir.setAttribute('y2', 0);
+
+        // directrix
+        const vb = 2.4 * Math.abs(p) * TT + 0.2;
+        lineFromPoints(dir2a, {{ x: uDir, y: -vb }}, {{ x: uDir, y: vb }});
+        dir2b.setAttribute('display', 'none');
+        seg2f2.setAttribute('display', 'inline');
+        seg2dir.setAttribute('display', 'none');
+        c2f2.setAttribute('display', 'none');
+
+        // 3D draw: plane + cone + curve
+        const P3 = to3D(P.x, P.y);
+        const F3 = to3D(f1.x, f1.y);
+        const Q3 = to3D(Qdir.x, Qdir.y);
+
+        const pts3 = ptsMain.map((pp) => project3D(to3D(pp.x, pp.y)));
+        path3Main.setAttribute('d', pathFrom2D(pts3));
+        path3Alt.setAttribute('d', '');
+        circleAt(c3p, project3D(P3));
+        circleAt(c3f1, project3D(F3));
+        c3f2.setAttribute('display', 'none');
+        lineFromPoints(seg3f1, project3D(P3), project3D(F3));
+        lineFromPoints(seg3f2, project3D(P3), project3D(Q3));
+        seg3dir.setAttribute('x1', 0); seg3dir.setAttribute('y1', 0); seg3dir.setAttribute('x2', 0); seg3dir.setAttribute('y2', 0);
+
+        // directrix line segment (3D)
+        const vMin = -vb, vMax = vb;
+        lineFromPoints(dir3a, project3D(to3D(uDir, vMin)), project3D(to3D(uDir, vMax)));
+        dir3b.setAttribute('display', 'none');
+
+        // Plane polygon bounds from 2D bounds
+        const b2 = worldBounds([...ptsMain, f1, P, Qdir, {{ x: uDir, y: -vb }}, {{ x: uDir, y: vb }}]);
+        setViewBox(svg2, b2, 0.9);
+
+        const planePad = 0.8;
+        const corners = [
+          project3D(to3D(b2.xmin - planePad, b2.ymin - planePad)),
+          project3D(to3D(b2.xmax + planePad, b2.ymin - planePad)),
+          project3D(to3D(b2.xmax + planePad, b2.ymax + planePad)),
+          project3D(to3D(b2.xmin - planePad, b2.ymax + planePad)),
+        ];
+        planePoly.setAttribute('points', polyPoints(corners));
+
+        // Cone wireframe
+        const maxZ = Math.max(...[...ptsMain.map((pp) => Math.abs(to3D(pp.x, pp.y).z)), Math.abs(P3.z)]) + 1.4;
+        const zMax = Math.min(12, Math.max(3.0, maxZ));
+        const rMax = m * zMax;
+        const circlePtsTop = [];
+        const circlePtsBot = [];
+        for (let i = 0; i <= 160; i++) {{
+          const ang = (i / 160) * 2 * Math.PI;
+          circlePtsTop.push(project3D({{ x: rMax * Math.cos(ang), y: rMax * Math.sin(ang), z: zMax }}));
+          circlePtsBot.push(project3D({{ x: rMax * Math.cos(ang), y: rMax * Math.sin(ang), z: -zMax }}));
+        }}
+        coneCircleTop.setAttribute('d', pathFrom2D(circlePtsTop));
+        coneCircleBot.setAttribute('d', pathFrom2D(circlePtsBot));
+
+        for (let i = 0; i < GEN; i++) {{
+          const ang = (i / GEN) * 2 * Math.PI;
+          const top = project3D({{ x: rMax * Math.cos(ang), y: rMax * Math.sin(ang), z: zMax }});
+          const bot = project3D({{ x: rMax * Math.cos(ang), y: rMax * Math.sin(ang), z: -zMax }});
+          const apex = project3D({{ x: 0, y: 0, z: 0 }});
+          lineFromPoints(coneLines[i], apex, top);
+          lineFromPoints(coneLines[i + GEN], apex, bot);
+        }}
+
+        const b3 = worldBounds([...circlePtsTop, ...circlePtsBot, ...corners, ...pts3, project3D(P3), project3D(F3), project3D(Q3)]);
+        setViewBox(svg3, b3, 0.9);
+
+        // invariants readout
+        const PF = dist(P, f1);
+        const dDir = Math.abs(P.x - uDir);
+        readout.innerHTML = `
+          <div><span class="k">类型</span>：抛物线（θ≈${{fmt(thetaParab, 1)}}°）｜β=${{fmt(betaDeg,1)}}°，θ=${{fmt(thetaDeg,1)}}°，h=${{fmt(h,2)}}</div>
+          <div><span class="k">焦点-准线</span>：e=1，PF=${{fmt(PF,6)}}，dist(P,dir)=${{fmt(dDir,6)}}，误差=${{fmt(PF - dDir, 8)}}</div>
+        `;
+        return;
+      }}
+
+      // ellipse/hyperbola
+      const deltaAbs = Math.abs(delta);
+      const uShift = (m * m * s * h * sqrtDen) / delta;
+      u0 = uShift;
+
+      const b2 = (m * m * h * h) / deltaAbs;
+      const a2 = (m * m * h * h * denom) / (deltaAbs * deltaAbs);
+      a = Math.sqrt(a2);
+      b = Math.sqrt(b2);
+
+      if (type === 'ellipse') {{
+        c = Math.sqrt(Math.max(a2 - b2, 0));
+      }} else {{
+        c = Math.sqrt(a2 + b2);
+      }}
+      ecc = c / a;
+      f1 = {{ x: u0 + c, y: 0 }};
+      f2 = {{ x: u0 - c, y: 0 }};
+
+      const dirOffset = a / ecc; // a/e
+      dirU1 = u0 + dirOffset;
+      dirU2 = u0 - dirOffset;
+
+      const branch = branchSel.value === 'left' ? -1 : 1;
+      if (type === 'ellipse') {{
+        P = {{ x: u0 + a * Math.cos(t), y: b * Math.sin(t) }};
+      }} else {{
+        P = {{ x: u0 + branch * a * Math.cosh(t), y: b * Math.sinh(t) }};
+      }}
+
+      // For focus-directrix ratio, use the focus/directrix on the same side as P.
+      const pickPlus = P.x >= u0;
+      const focusPick = pickPlus ? f1 : f2;
+      const dirPickU = pickPlus ? dirU1 : dirU2;
+      Qdir = {{ x: dirPickU, y: P.y }};
+
+      // Curve points
+      if (type === 'ellipse') {{
+        const N = 540;
+        ptsMain = [];
+        for (let i = 0; i <= N; i++) {{
+          const tt = (i / N) * 2 * Math.PI;
+          ptsMain.push({{ x: u0 + a * Math.cos(tt), y: b * Math.sin(tt) }});
+        }}
+        ptsAlt = [];
+      }} else {{
+        const U = 1.6;
+        const N = 520;
+        ptsMain = [];
+        ptsAlt = [];
+        for (let i = 0; i <= N; i++) {{
+          const uu = -U + (2 * U * i) / N;
+          const x = a * Math.cosh(uu);
+          const y = b * Math.sinh(uu);
+          ptsMain.push({{ x: u0 + x, y }});
+          ptsAlt.push({{ x: u0 - x, y }});
+        }}
+      }}
+
+      // 2D draw
+      path2Main.setAttribute('d', pathFrom2D(ptsMain));
+      path2Alt.setAttribute('d', type === 'hyperbola' ? pathFrom2D(ptsAlt) : '');
+
+      circleAt(c2f1, f1);
+      circleAt(c2f2, f2);
+      c2f2.setAttribute('display', 'inline');
+      circleAt(c2p, P);
+
+      lineFromPoints(seg2f1, P, f1);
+      lineFromPoints(seg2f2, P, f2);
+      lineFromPoints(seg2dir, P, Qdir);
+      seg2dir.setAttribute('display', 'inline');
+
+      const bounds2 = worldBounds([...ptsMain, ...(type === 'hyperbola' ? ptsAlt : []), f1, f2, P, Qdir]);
+      setViewBox(svg2, bounds2, 1.0);
+
+      const vSpan = (bounds2.ymax - bounds2.ymin) * 0.55 + 0.8;
+      lineFromPoints(dir2a, {{ x: dirU1, y: -vSpan }}, {{ x: dirU1, y: vSpan }});
+      lineFromPoints(dir2b, {{ x: dirU2, y: -vSpan }}, {{ x: dirU2, y: vSpan }});
+      dir2b.setAttribute('display', 'inline');
+
+      // 3D draw
+      const pts3Main = ptsMain.map((pp) => project3D(to3D(pp.x, pp.y)));
+      const pts3Alt = type === 'hyperbola' ? ptsAlt.map((pp) => project3D(to3D(pp.x, pp.y))) : [];
+      path3Main.setAttribute('d', pathFrom2D(pts3Main));
+      path3Alt.setAttribute('d', type === 'hyperbola' ? pathFrom2D(pts3Alt) : '');
+
+      const P3 = to3D(P.x, P.y);
+      const F13 = to3D(f1.x, f1.y);
+      const F23 = to3D(f2.x, f2.y);
+      const Q3 = to3D(Qdir.x, Qdir.y);
+
+      circleAt(c3p, project3D(P3));
+      circleAt(c3f1, project3D(F13));
+      circleAt(c3f2, project3D(F23));
+      c3f2.setAttribute('display', 'inline');
+      lineFromPoints(seg3f1, project3D(P3), project3D(F13));
+      lineFromPoints(seg3f2, project3D(P3), project3D(F23));
+      lineFromPoints(seg3dir, project3D(P3), project3D(Q3));
+      seg3dir.setAttribute('display', 'inline');
+
+      // Directrices (3D): u = const, vary v
+      const vMin = bounds2.ymin - 0.6;
+      const vMax = bounds2.ymax + 0.6;
+      lineFromPoints(dir3a, project3D(to3D(dirU1, vMin)), project3D(to3D(dirU1, vMax)));
+      lineFromPoints(dir3b, project3D(to3D(dirU2, vMin)), project3D(to3D(dirU2, vMax)));
+      dir3b.setAttribute('display', 'inline');
+
+      // Plane polygon for 3D view
+      const planePad = 0.8;
+      const corners = [
+        project3D(to3D(bounds2.xmin - planePad, bounds2.ymin - planePad)),
+        project3D(to3D(bounds2.xmax + planePad, bounds2.ymin - planePad)),
+        project3D(to3D(bounds2.xmax + planePad, bounds2.ymax + planePad)),
+        project3D(to3D(bounds2.xmin - planePad, bounds2.ymax + planePad)),
+      ];
+      planePoly.setAttribute('points', polyPoints(corners));
+
+      // Cone wireframe
+      const curve3dZ = Math.max(
+        ...ptsMain.map((pp) => Math.abs(to3D(pp.x, pp.y).z)),
+        ...(type === 'hyperbola' ? ptsAlt.map((pp) => Math.abs(to3D(pp.x, pp.y).z)) : [0]),
+        Math.abs(P3.z),
+        Math.abs(F13.z),
+        Math.abs(F23.z),
+      );
+      const zMax = Math.min(12, Math.max(3.0, curve3dZ + 1.4));
+      const rMax = m * zMax;
+      const circlePtsTop = [];
+      const circlePtsBot = [];
+      for (let i = 0; i <= 160; i++) {{
+        const ang = (i / 160) * 2 * Math.PI;
+        circlePtsTop.push(project3D({{ x: rMax * Math.cos(ang), y: rMax * Math.sin(ang), z: zMax }}));
+        circlePtsBot.push(project3D({{ x: rMax * Math.cos(ang), y: rMax * Math.sin(ang), z: -zMax }}));
+      }}
+      coneCircleTop.setAttribute('d', pathFrom2D(circlePtsTop));
+      coneCircleBot.setAttribute('d', pathFrom2D(circlePtsBot));
+
+      const apex = project3D({{ x: 0, y: 0, z: 0 }});
+      for (let i = 0; i < GEN; i++) {{
+        const ang = (i / GEN) * 2 * Math.PI;
+        const top = project3D({{ x: rMax * Math.cos(ang), y: rMax * Math.sin(ang), z: zMax }});
+        const bot = project3D({{ x: rMax * Math.cos(ang), y: rMax * Math.sin(ang), z: -zMax }});
+        lineFromPoints(coneLines[i], apex, top);
+        lineFromPoints(coneLines[i + GEN], apex, bot);
+      }}
+
+      const all3 = [
+        ...circlePtsTop,
+        ...circlePtsBot,
+        ...corners,
+        ...pts3Main,
+        ...(type === 'hyperbola' ? pts3Alt : []),
+        project3D(P3),
+        project3D(F13),
+        project3D(F23),
+        project3D(Q3),
+      ];
+      const bounds3 = worldBounds(all3);
+      setViewBox(svg3, bounds3, 0.9);
+
+      // invariants
+      const d1 = dist(P, f1);
+      const d2 = dist(P, f2);
+      const sum = d1 + d2;
+      const diff = Math.abs(d1 - d2);
+      const target = 2 * a;
+
+      const dDir = Math.abs(P.x - dirPickU);
+      const ratio = dDir > 1e-12 ? (dist(P, focusPick) / dDir) : NaN;
+
+      if (type === 'ellipse') {{
+        readout.innerHTML = `
+          <div><span class="k">类型</span>：椭圆（θ&lt;${{fmt(thetaParab, 1)}}°）｜β=${{fmt(betaDeg,1)}}°，θ=${{fmt(thetaDeg,1)}}°，h=${{fmt(h,2)}}</div>
+          <div><span class="k">距离和</span>：PF₁+PF₂=${{fmt(sum, 6)}}，2a=${{fmt(target, 6)}}，误差=${{fmt(sum - target, 8)}}</div>
+          <div><span class="k">焦点-准线</span>：e=${{fmt(ecc, 6)}}，PF/dist(dir)≈${{fmt(ratio, 6)}}（同侧焦点/准线）</div>
+        `;
+      }} else {{
+        readout.innerHTML = `
+          <div><span class="k">类型</span>：双曲线（θ&gt;${{fmt(thetaParab, 1)}}°）｜β=${{fmt(betaDeg,1)}}°，θ=${{fmt(thetaDeg,1)}}°，h=${{fmt(h,2)}}</div>
+          <div><span class="k">距离差</span>：|PF₁−PF₂|=${{fmt(diff, 6)}}，2a=${{fmt(target, 6)}}，误差=${{fmt(diff - target, 8)}}</div>
+          <div><span class="k">焦点-准线</span>：e=${{fmt(ecc, 6)}}，PF/dist(dir)≈${{fmt(ratio, 6)}}（同侧焦点/准线）</div>
+        `;
+      }}
+    }}
+
+    redraw();
+  }}
+
   function init() {{
     mountExampleA();
     mountParabola();
     mountHyperbola();
     mountDirectorCircle();
+    mountConeUnified();
   }}
 
   if (document.readyState === 'loading') {{
@@ -1466,6 +1993,17 @@ def _render_html(md: str, title: str, interactive_js: str) -> str:
         gap: 8px;
         margin: 0 0 10px;
       }}
+      .widget-views {{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 0 0 10px;
+      }}
+      @media (max-width: 840px) {{
+        .widget-views {{
+          grid-template-columns: 1fr;
+        }}
+      }}
       .control-row {{
         display: grid;
         grid-template-columns: 120px 1fr 160px;
@@ -1513,6 +2051,13 @@ def _render_html(md: str, title: str, interactive_js: str) -> str:
         stroke-width: 1.6;
         vector-effect: non-scaling-stroke;
       }}
+      .curve-alt {{
+        fill: none;
+        stroke: color-mix(in srgb, var(--link) 70%, var(--fg));
+        stroke-width: 1.2;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.55;
+      }}
       .seg {{
         stroke: color-mix(in srgb, #f59e0b 88%, var(--fg));
         stroke-width: 1.4;
@@ -1524,6 +2069,25 @@ def _render_html(md: str, title: str, interactive_js: str) -> str:
         stroke-width: 1.4;
         vector-effect: non-scaling-stroke;
         opacity: 0.9;
+      }}
+      .seg3 {{
+        stroke: color-mix(in srgb, #a855f7 85%, var(--fg));
+        stroke-width: 1.3;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.9;
+      }}
+      .cone {{
+        stroke: color-mix(in srgb, var(--muted) 70%, var(--fg));
+        stroke-width: 1.0;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.7;
+      }}
+      .plane {{
+        fill: color-mix(in srgb, var(--link) 16%, transparent);
+        stroke: color-mix(in srgb, var(--link) 45%, var(--fg));
+        stroke-width: 0.95;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.85;
       }}
       .focus {{
         fill: color-mix(in srgb, #ef4444 88%, var(--fg));
